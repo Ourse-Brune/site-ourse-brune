@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function SeriesSection({ seriesList, onSelectDish, onOrderDish }) {
+export default function SeriesSection({ seriesList, onSelectDish }) {
   // MEXICO ! est ouvert par défaut comme sur la maquette
   const [openSeries, setOpenSeries] = useState({ mexico: true })
 
@@ -56,7 +56,7 @@ export default function SeriesSection({ seriesList, onSelectDish, onOrderDish })
 
           return (
             <div key={serie.id} id={`series-${serie.id}`} className="w-full flex flex-col scroll-mt-20">
-              {/* BANDEAU DE SÉRIE — PLEINE LARGEUR D'ÉCRAN */}
+              {/* BANDEAU DE SÉRIE — PLEINE LARGEUR D'ÉCRAN SANS TEXTE INCRUSTÉ */}
               <button
                 type="button"
                 onClick={() => hasItems && toggleSeries(serie.id)}
@@ -75,24 +75,20 @@ export default function SeriesSection({ seriesList, onSelectDish, onOrderDish })
                   }`}
                 />
 
-                {/* Voile subtil au survol si la série a du contenu */}
-                {hasItems && (
-                  <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors duration-200"></div>
-                )}
+                {/* Image 100% pure et lumineuse au repos, très léger voile de 5% au survol */}
+                <div className="absolute inset-0 bg-transparent group-hover:bg-black/5 transition-colors duration-200"></div>
 
-                {/* Indicateur déplier / replier si la série a du contenu */}
-                {hasItems && (
-                  <div className="absolute right-4 sm:right-8 md:right-12 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/40 text-white/90 flex items-center justify-center backdrop-blur-xs transition-transform duration-300 group-hover:bg-black/70">
-                    <svg
-                      className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                )}
+                {/* TEXTE DU BANDEAU SUPERPOSÉ (ÉDITABLE DANS SANITY) */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center pointer-events-none">
+                  <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-normal tracking-[0.2em] sm:tracking-[0.25em] md:tracking-[0.3em] text-white uppercase drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] font-sans">
+                    {serie.bannerText || serie.title}
+                  </h2>
+                  {serie.bannerSubtitle && (
+                    <p className="mt-2 text-xs sm:text-sm md:text-base font-normal tracking-[0.15em] text-white/90 drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)] uppercase">
+                      {serie.bannerSubtitle}
+                    </p>
+                  )}
+                </div>
               </button>
 
               {/* CONTENU DÉPLIABLE DE LA SÉRIE — AFFICHÉ UNIQUEMENT SI LA SÉRIE CONTIENT DES PIÈCES */}
@@ -112,7 +108,7 @@ export default function SeriesSection({ seriesList, onSelectDish, onOrderDish })
                         </p>
                       ) : null}
 
-                      {/* Grille des pièces si la série est active */}
+                      {/* Grille des pièces céramiques */}
                       <div className="w-full flex flex-col items-center">
                         <div className="w-full max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 sm:gap-10 justify-items-center mb-8">
                           {serie.items.map((dish) => (
@@ -121,18 +117,18 @@ export default function SeriesSection({ seriesList, onSelectDish, onOrderDish })
                               onClick={() => onSelectDish(dish)}
                               className="group flex flex-col items-center text-center cursor-pointer max-w-[260px] w-full transition-all duration-300 hover:-translate-y-1.5"
                             >
-                              {/* Photo de la céramique */}
-                              <div className="relative w-48 sm:w-52 md:w-56 aspect-square mb-4 rounded-full p-2 bg-stone-50 transition-all duration-300 group-hover:shadow-2xl">
+                              {/* Photo principale de la céramique telle quelle avec bords arrondis */}
+                              <div className="relative w-48 sm:w-52 md:w-56 aspect-square mb-4 rounded-xl overflow-hidden bg-stone-100 shadow-sm transition-all duration-300 group-hover:shadow-lg">
                                 <img
                                   src={dish.image}
                                   alt={dish.name}
-                                  className="w-full h-full object-contain transform transition-transform duration-500 group-hover:scale-105"
+                                  className="w-full h-full object-cover object-center transform transition-transform duration-500 group-hover:scale-105"
                                   loading="lazy"
                                 />
-                                <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/5 transition-colors"></div>
+                                <div className="absolute inset-0 rounded-xl bg-black/0 group-hover:bg-black/5 transition-colors"></div>
                               </div>
 
-                              {/* Détails de la pièce */}
+                              {/* Détails de la pièce (texte distinct sous l'image) */}
                               <h3 className="text-sm sm:text-base font-extrabold tracking-wider text-stone-900 uppercase mb-1">
                                 {dish.name}
                               </h3>

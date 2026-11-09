@@ -7,7 +7,7 @@ import ContactSection from './components/ContactSection'
 import NewsletterSection from './components/NewsletterSection'
 import DishModal from './components/DishModal'
 import Footer from './components/Footer'
-import { SERIES_LIST } from './data/siteData'
+import { SERIES_LIST, SITE_BANNERS_DEFAULT } from './data/siteData'
 import { sanityClient, urlFor } from './lib/sanity'
 
 function formatSanityDish(p) {
@@ -21,8 +21,8 @@ function formatSanityDish(p) {
     statusText = 'ÉPUISÉ'
   }
 
-  const mainImageUrl = p.mainImage ? urlFor(p.mainImage).width(700).url() : ''
-  const fullImageUrl = p.fullImage ? urlFor(p.fullImage).width(1600).url() : ''
+  const mainImageUrl = p.mainImage ? urlFor(p.mainImage).width(1000).url() : ''
+  const fullImageUrl = p.fullImage ? urlFor(p.fullImage).width(1600).url() : mainImageUrl
   const galleryUrls = p.gallery && Array.isArray(p.gallery)
     ? p.gallery.map((img) => urlFor(img).width(1600).url())
     : []
@@ -45,23 +45,37 @@ function formatSanityDish(p) {
 
 function App() {
   const [seriesList, setSeriesList] = useState(SERIES_LIST)
+  const [siteBanners, setSiteBanners] = useState(SITE_BANNERS_DEFAULT)
   const [selectedDish, setSelectedDish] = useState(null)
   const [contactSubject, setContactSubject] = useState("Commande d'une pièce")
-  const [contactPiece, setContactPiece] = useState('')
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [sanitySeries, sanityPieces] = await Promise.all([
-          sanityClient.fetch(`*[_type == "serie"] | order(order asc, _createdAt asc)`),
+        const [sanitySeries, sanityPieces, sanityBanners] = await Promise.all([
+          sanityClient.fetch(`*[_type == "serie" && !(_id in path("drafts.**"))] | order(order asc, _createdAt asc)`),
           sanityClient.fetch(
-            `*[_type == "piece"] | order(order asc, _createdAt desc) {
+            `*[_type == "piece" && !(_id in path("drafts.**"))] | order(order asc, _createdAt desc) {
               ...,
               "serieSlug": coalesce(serie->slug.current, serie),
               "serieRef": serie._ref
             }`
           ),
+          sanityClient.fetch(`*[_type == "siteBanners"][0]`),
         ])
+
+        if (sanityBanners) {
+          setSiteBanners((prev) => ({
+            ...prev,
+            surMesureTitle: sanityBanners.surMesureTitle || prev.surMesureTitle,
+            surMesureBanner: sanityBanners.surMesureBanner
+              ? urlFor(sanityBanners.surMesureBanner).width(1600).url()
+              : prev.surMesureBanner,
+            ourseBruneTitle: sanityBanners.ourseBruneTitle || prev.ourseBruneTitle,
+            contactTitle: sanityBanners.contactTitle || prev.contactTitle,
+            newsletterTitle: sanityBanners.newsletterTitle || prev.newsletterTitle,
+          }))
+        }
 
         if (sanitySeries && sanitySeries.length > 0) {
           const dynamicSeries = sanitySeries.map((s) => {
@@ -77,11 +91,13 @@ function App() {
             return {
               id: serieSlug,
               title: s.title,
+              bannerText: s.bannerText || s.title,
+              bannerSubtitle: s.bannerSubtitle || '',
               bannerImg: bannerUrl,
               order: s.order ?? 99,
               description: s.description || '',
-              items: matchedPieces,
-              isReady: matchedPieces.length > 0,
+              items: matchedPieces.length > 0 ? matchedPieces : (SERIES_LIST.find((loc) => loc.id === serieSlug)?.items || []),
+              isReady: true,
             }
           })
           setSeriesList(dynamicSeries)
@@ -113,8 +129,7 @@ function App() {
 
   const handleOrderPiece = (pieceName) => {
     setSelectedDish(null)
-    setContactSubject("Commande d'une pièce")
-    setContactPiece(pieceName)
+    setContactSubject(pieceName ? `Commande : ${pieceName}` : "Commande d'une pièce")
     const el = document.getElementById('contact')
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -123,7 +138,6 @@ function App() {
 
   const handleContactClick = (subject) => {
     setContactSubject(subject || "Projet sur-mesure")
-    setContactPiece('')
     const el = document.getElementById('contact')
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -142,36 +156,47 @@ function App() {
       {/* HEADER HERO (Ours pleine largeur avec logo et menu hamburger 2 barres) */}
       <Header onNavigate={handleNavigate} />
 
-      {/* MAIN CONTAINER */}
-      <main className="w-full flex flex-col items-center">
-        {/* 6 SERIES ACCORDION */}
+      {/* MAIN CONTAINER (RIDEAU QUI REMONTE SUR L'OURS FIXE) */}
+      <main className="relative z-10 w-full flex flex-col items-center bg-white shadow-[0_-12px_30px_rgba(0,0,0,0.25)]">
+        {/* 6 SÉRIES ACCORDÉON AVEC BANDEAUX ET TEXTES SUPERPOSÉS */}
         <SeriesSection
           seriesList={seriesList}
           onSelectDish={setSelectedDish}
-          onOrderDish={handleOrderPiece}
         />
 
         {/* LE SUR-MESURE */}
-        <SurMesureSection onContactClick={handleContactClick} />
-
-        {/* OURSE BRUNE ? (Burgundy banner) */}
-        <OurseBruneSection />
-
-        {/* CONTACT / COMMANDE (Yellow banner) */}
-        <ContactSection
-          initialSubject={contactSubject}
+        <SurMesureSection
+          bannerTitle={siteBanners.surMesureTitle}
+          bannerImage={siteBanners.surMesureBanner}
+          onContactClick={handleContactClick}
         />
 
-        {/* ACTUALITÉS / NEWSLETTER (Black banner) */}
-        <NewsletterSection />
+        {/* OURSE BRUNE ? (Bandeau Bordeaux) */}
+        <OurseBruneSection
+          bannerTitle={siteBanners.ourseBruneTitle}
+        />
+
+        {/* CONTACT / COMMANDE (Bandeau Jaune) */}
+        <ContactSection
+          initialSubject={contactSubject}
+          bannerTitle={siteBanners.contactTitle}
+        />
+
+        {/* ACTUALITÉS / NEWSLETTER (Bandeau Noir) */}
+        <NewsletterSection
+          bannerTitle={siteBanners.newsletterTitle}
+        />
       </main>
 
       {/* FOOTER */}
-      <Footer />
+      <div className="relative z-10 w-full">
+        <Footer />
+      </div>
 
-      {/* LIGHTBOX MODAL FOR ARTWORKS */}
+      {/* LIGHTBOX MODAL SANS FLÈCHES, AVEC POINTS ET NAVIGATION SWIPE / DRAG */}
       {selectedDish && (
         <DishModal
+          key={selectedDish.id}
           dish={selectedDish}
           onClose={() => setSelectedDish(null)}
           onOrder={handleOrderPiece}

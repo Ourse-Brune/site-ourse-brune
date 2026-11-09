@@ -39,13 +39,12 @@ export default function Header({ onNavigate }) {
   return (
     <>
       {/* 
-        HEADER BANNER FULL-WIDTH
-        L'image de l'ours s'affiche sur toute la largeur de la page,
-        le bas s'arrête juste au-dessus du museau.
+        HEADER BANNER FULL-WIDTH (STICKY SOUS-JACENT)
+        L'image de l'ours reste fixe à l'écran tandis que le reste du site remonte par-dessus.
       */}
-      <header className="relative w-full overflow-hidden bg-stone-900 select-none">
-        {/* Conteneur image qui respecte le ratio exact du cadrage au-dessus du museau */}
-        <div className="relative w-full aspect-[1456/760] min-h-[280px] sm:min-h-[380px] md:min-h-0 flex items-center justify-center">
+      <header className="sticky top-0 z-0 w-full h-[100dvh] min-h-[100dvh] overflow-hidden bg-stone-900 select-none">
+        {/* Conteneur plein écran : couvre l'intégralité de la hauteur pour masquer la section du dessous */}
+        <div className="relative w-full h-full flex items-center justify-center">
           <img
             src="/images/HEADER-OURS.jpg"
             alt="Ourse Brune — Plat en céramique emblématique Ours"

@@ -1,6 +1,9 @@
 import { useState } from 'react'
 
-export default function SurMesureSection() {
+export default function SurMesureSection({
+  bannerTitle = 'LE SUR-MESURE',
+  bannerImage = '/images/Bandeaux/BANDO_SUR-MESURE.jpg',
+}) {
   const [isOpen, setIsOpen] = useState(false)
 
   const toggle = () => setIsOpen(!isOpen)
@@ -14,7 +17,7 @@ export default function SurMesureSection() {
   return (
     <section id="section-sur-mesure" className="w-full bg-white flex flex-col items-center scroll-mt-20">
       <div className="w-full flex flex-col">
-        {/* BANDEAU LE SUR-MESURE — PLEINE LARGEUR */}
+        {/* BANDEAU LE SUR-MESURE — PLEINE LARGEUR SANS TEXTE DANS L'IMAGE */}
         <button
           type="button"
           onClick={toggle}
@@ -22,21 +25,19 @@ export default function SurMesureSection() {
           aria-expanded={isOpen}
         >
           <img
-            src="/images/bandeau-le-sur-mesure.jpg"
-            alt="Le Sur-Mesure"
+            src={bannerImage}
+            alt={bannerTitle}
             className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-101 block"
           />
-          <div className="absolute inset-0 bg-black/5 group-hover:bg-black/20 transition-colors duration-200"></div>
 
-          <div className="absolute right-4 sm:right-8 md:right-12 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black/40 text-white/90 flex items-center justify-center backdrop-blur-xs transition-transform duration-300 group-hover:bg-black/70">
-            <svg
-              className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-            </svg>
+          {/* Image 100% pure et lumineuse au repos, très léger voile de 5% au survol */}
+          <div className="absolute inset-0 bg-transparent group-hover:bg-black/5 transition-colors duration-200"></div>
+
+          {/* TEXTE DU BANDEAU SUPERPOSÉ (ÉDITABLE DANS SANITY) */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center pointer-events-none">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-normal tracking-[0.16em] sm:tracking-[0.22em] md:tracking-[0.28em] text-white uppercase drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] font-sans">
+              {bannerTitle}
+            </h2>
           </div>
         </button>
 
@@ -50,7 +51,7 @@ export default function SurMesureSection() {
             {/* Texte noir sur blanc, sans fioritures, centré */}
             <div className="w-full max-w-3xl px-4 sm:px-8 space-y-6 text-black text-center text-sm sm:text-base md:text-lg leading-relaxed font-sans mb-8 sm:mb-12">
               <p>
-                La céramique permet de proposer des œuvres murales aux formats très divers et robustes dans le temps dedans comme dehors, quand on maîtrise le choix des terres et des émaux. Elle sont adaptés aux intempéries et ne subissent pas ou peu de dégradations évitant ainsi des rénovations futures.
+                La céramique permet de proposer des œuvres murales aux formats très divers et robustes dans le temps dedans comme dehors, quand on maîtrise le choix des terres et des émaux. Elles sont adaptées aux intempéries et ne subissent pas ou peu de dégradations évitant ainsi des rénovations futures.
               </p>
               <p>
                 Ainsi, je permets à mes clients d’investir dans une décoration exceptionnellement durable.
@@ -59,9 +60,9 @@ export default function SurMesureSection() {
                 J'apprécie de sortir de mon atelier pour travailler en équipe, avec des entreprises comme des restaurants, hôtels, magasins et autres ou pour le compte d’architectes d’intérieurs. Pour ces derniers, je m'adapte aux cahiers des charges techniques et à la direction artistique des projets dans leur ensemble.
               </p>
               <p>
-                Ce matériau noble permet aussi une décoration harmonieuse entre l’intérieur et l’extérieur, puisse qu’elle est assurée par la même artiste.
+                Ce matériau noble permet aussi une décoration harmonieuse entre l’intérieur et l’extérieur, puisqu’elle est assurée par la même artiste.
               </p>
-              <p className="pt-2 font-medium">
+              <p className="pt-2 font-medium text-stone-500">
                 Photo de fresque à venir.
               </p>
             </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { CONTACT_POLICY } from '../data/siteData'
 
-export default function ContactSection({ initialSubject }) {
+export default function ContactSection({ initialSubject, bannerTitle = 'CONTACT / COMMANDE' }) {
   const [isOpen, setIsOpen] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -45,20 +45,9 @@ export default function ContactSection({ initialSubject }) {
           className="group relative w-full py-10 sm:py-14 bg-[#fba700] hover:bg-[#e69800] transition-colors duration-200 cursor-pointer flex items-center justify-center text-center px-6 block leading-none"
           aria-expanded={isOpen}
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-widest text-white uppercase font-sans">
-            CONTACT / COMMANDE
+          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-normal tracking-[0.14em] sm:tracking-[0.2em] text-white uppercase font-sans">
+            {bannerTitle}
           </h2>
-
-          <div className="absolute right-4 sm:right-8 md:right-12 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/20 text-white flex items-center justify-center backdrop-blur-xs transition-transform duration-300 group-hover:bg-white/30">
-            <svg
-              className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
         </button>
 
         {/* CONTENU DÉPLIABLE DU FORMULAIRE */}
