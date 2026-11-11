@@ -43,7 +43,7 @@ export default function Header({ onNavigate }) {
         - Couvre 100% de la hauteur de l'écran (100dvh) sur mobile comme sur desktop pour un rendu héroïque pleine page
         - ACCUEIL-OURS 2.jpg (portrait 1456x1920) permet d'afficher l'ours avec toute sa hauteur sur smartphone
       */}
-      <header className="sticky top-0 z-0 w-full h-[100dvh] min-h-[100dvh] overflow-hidden bg-stone-900 select-none">
+      <header className="sticky top-0 z-0 w-full h-[calc(100dvh-12px)] min-h-[calc(100dvh-12px)] landscape:h-[100dvh] landscape:min-h-[100dvh] overflow-hidden bg-stone-900 select-none">
         <div className="relative w-full h-full flex items-center justify-center">
           <img
             src="/images/ACCUEIL-OURS 2.jpg"
@@ -76,6 +76,27 @@ export default function Header({ onNavigate }) {
               />
             </a>
           </div>
+
+          {/* FLÈCHE QUI SAUTILLE EN BAS DU HEADER SUR MOBILE (Indicateur invitant au défilement) */}
+          <button
+            type="button"
+            onClick={() => {
+              const el = document.getElementById('series-section')
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
+            className="absolute bottom-2.5 sm:bottom-3 left-1/2 -translate-x-1/2 z-20 p-2 text-white/90 hover:text-white transition-opacity animate-bounce cursor-pointer portrait:flex landscape:hidden md:hidden flex-col items-center select-none"
+            title="Défiler vers le bas"
+            aria-label="Défiler vers le bas"
+          >
+            <svg
+              className="w-5 h-5 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
         </div>
       </header>
 
