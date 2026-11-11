@@ -1,9 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Quicksand', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Comfortaa', 'Quicksand', system-ui, -apple-system, sans-serif;
+  --font-comfortaa: 'Comfortaa', cursive, sans-serif;
   --font-urbanist: 'Urbanist', system-ui, -apple-system, sans-serif;
   --font-diplomata: 'Diplomata SC', cursive;
+}
+
+.text-justify-center {
+  text-align: justify;
+  text-align-last: center;
 }
 
 html {

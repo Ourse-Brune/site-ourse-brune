@@ -40,10 +40,10 @@ export default function Header({ onNavigate }) {
     <>
       {/* 
         HEADER BANNER FULL-WIDTH (STICKY SOUS-JACENT)
-        L'image de l'ours reste fixe à l'écran tandis que le reste du site remonte par-dessus.
+        - Sur mobile / portrait : respecte le ratio naturel (1366/750) pour afficher l'intégralité de l'ours sans aucun recadrage
+        - Sur écran large / desktop (landscape) : couvre 100% de la hauteur de l'écran (100dvh) pour masquer la section Mexico au chargement
       */}
-      <header className="sticky top-0 z-0 w-full h-[100dvh] min-h-[100dvh] overflow-hidden bg-stone-900 select-none">
-        {/* Conteneur plein écran : couvre l'intégralité de la hauteur pour masquer la section du dessous */}
+      <header className="sticky top-0 z-0 w-full aspect-[1366/750] landscape:aspect-auto landscape:h-[100dvh] landscape:min-h-[100dvh] overflow-hidden bg-stone-900 select-none">
         <div className="relative w-full h-full flex items-center justify-center">
           <img
             src="/images/HEADER-OURS.jpg"
@@ -55,9 +55,9 @@ export default function Header({ onNavigate }) {
 
           {/* 
             LOGO « Ourse brune — ART CÉRAMIQUE »
-            Centré horizontalement et positionné exactement entre les deux oreilles
+            Centré horizontalement et verticalement entre le haut du crâne de l'ours et la bordure rouge supérieure
           */}
-          <div className="absolute top-[5%] sm:top-[6%] md:top-[7%] left-1/2 -translate-x-1/2 w-[48%] sm:w-[42%] md:w-[38%] max-w-[460px] pointer-events-auto">
+          <div className="absolute top-[32%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[50%] sm:w-[44%] md:w-[38%] max-w-[460px] pointer-events-auto">
             <a
               href="#"
               onClick={(e) => {

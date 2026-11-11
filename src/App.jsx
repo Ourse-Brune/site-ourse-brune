@@ -7,7 +7,7 @@ import ContactSection from './components/ContactSection'
 import NewsletterSection from './components/NewsletterSection'
 import DishModal from './components/DishModal'
 import Footer from './components/Footer'
-import { SERIES_LIST, SITE_BANNERS_DEFAULT } from './data/siteData'
+import { SERIES_LIST, SITE_BANNERS_DEFAULT, DEFAULT_EVENTS } from './data/siteData'
 import { sanityClient, urlFor } from './lib/sanity'
 
 function formatSanityDish(p) {
@@ -46,13 +46,25 @@ function formatSanityDish(p) {
 function App() {
   const [seriesList, setSeriesList] = useState(SERIES_LIST)
   const [siteBanners, setSiteBanners] = useState(SITE_BANNERS_DEFAULT)
+  const [events, setEvents] = useState(DEFAULT_EVENTS)
+  const [ourseBruneText, setOurseBruneText] = useState('')
+  const [contactText, setContactText] = useState('')
+  const [actualiteText, setActualiteText] = useState('')
   const [selectedDish, setSelectedDish] = useState(null)
   const [contactSubject, setContactSubject] = useState("Commande d'une pièce")
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [sanitySeries, sanityPieces, sanityBanners] = await Promise.all([
+        const [
+          sanitySeries,
+          sanityPieces,
+          sanityBanners,
+          sanityEvents,
+          sanityOurseBrune,
+          sanityContact,
+          sanityActualite,
+        ] = await Promise.all([
           sanityClient.fetch(`*[_type == "serie" && !(_id in path("drafts.**"))] | order(order asc, _createdAt asc)`),
           sanityClient.fetch(
             `*[_type == "piece" && !(_id in path("drafts.**"))] | order(order asc, _createdAt desc) {
@@ -62,7 +74,37 @@ function App() {
             }`
           ),
           sanityClient.fetch(`*[_type == "siteBanners"][0]`),
+          sanityClient.fetch(`*[_type == "event" && !(_id in path("drafts.**"))] | order(order asc, _createdAt desc)`),
+          sanityClient.fetch(`*[_type == "texteOurseBrune"][0]`),
+          sanityClient.fetch(`*[_type == "texteContact"][0]`),
+          sanityClient.fetch(`*[_type == "texteActualite"][0]`),
         ])
+
+        if (sanityOurseBrune?.storyText) {
+          setOurseBruneText(sanityOurseBrune.storyText)
+        }
+
+        if (sanityContact?.text) {
+          setContactText(sanityContact.text)
+        }
+
+        if (sanityActualite?.text) {
+          setActualiteText(sanityActualite.text)
+        }
+
+        if (sanityEvents && sanityEvents.length > 0) {
+          const formatted = sanityEvents.map((ev) => ({
+            id: ev._id,
+            title: ev.title,
+            date: ev.date || '',
+            image: ev.image ? urlFor(ev.image).width(900).url() : '/images/COCTEAU-MALEINE.JPG',
+            description: ev.description || '',
+            link: ev.link || '',
+            linkText: ev.linkText || 'En savoir plus',
+            order: ev.order ?? 1,
+          }))
+          setEvents(formatted)
+        }
 
         if (sanityBanners) {
           setSiteBanners((prev) => ({
@@ -174,17 +216,21 @@ function App() {
         {/* OURSE BRUNE ? (Bandeau Bordeaux) */}
         <OurseBruneSection
           bannerTitle={siteBanners.ourseBruneTitle}
+          storyText={ourseBruneText}
         />
 
         {/* CONTACT / COMMANDE (Bandeau Jaune) */}
         <ContactSection
           initialSubject={contactSubject}
           bannerTitle={siteBanners.contactTitle}
+          contactText={contactText}
         />
 
         {/* ACTUALITÉS / NEWSLETTER (Bandeau Noir) */}
         <NewsletterSection
           bannerTitle={siteBanners.newsletterTitle}
+          events={events}
+          actualiteText={actualiteText}
         />
       </main>
 

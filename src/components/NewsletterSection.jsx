@@ -1,12 +1,13 @@
 import { useState } from 'react'
 
-export default function NewsletterSection({ bannerTitle = 'ACTUALITÉS / NEWSLETTER' }) {
+export default function NewsletterSection({
+  bannerTitle = 'ACTUALITÉS / NEWSLETTER',
+  events = [],
+  actualiteText = '',
+}) {
   const [isOpen, setIsOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [subscribed, setSubscribed] = useState(false)
-  const [isPopupOpen, setIsPopupOpen] = useState(false)
-  const [popupEmail, setPopupEmail] = useState('')
-  const [popupSubscribed, setPopupSubscribed] = useState(false)
 
   const toggle = () => setIsOpen(!isOpen)
 
@@ -20,13 +21,6 @@ export default function NewsletterSection({ bannerTitle = 'ACTUALITÉS / NEWSLET
     e.preventDefault()
     if (email) {
       setSubscribed(true)
-    }
-  }
-
-  const handlePopupSubscribe = (e) => {
-    e.preventDefault()
-    if (popupEmail) {
-      setPopupSubscribed(true)
     }
   }
 
@@ -45,31 +39,103 @@ export default function NewsletterSection({ bannerTitle = 'ACTUALITÉS / NEWSLET
           </h2>
         </button>
 
-        {/* CONTENU DÉPLIABLE DE LA NEWSLETTER */}
+        {/* CONTENU DÉPLIABLE DE LA SECTION ACTUALITÉS & NEWSLETTER */}
         <div
           className={`transition-all duration-500 ease-in-out overflow-hidden ${
-            isOpen ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+            isOpen ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
           }`}
         >
-          <div className="w-full bg-white pt-12 sm:pt-16 pb-0 flex flex-col items-center text-black">
-            {/* Texte noir sur blanc, sans fioritures, centré */}
-            <div className="w-full max-w-3xl px-4 sm:px-8 space-y-4 text-black text-center text-sm sm:text-base md:text-lg leading-relaxed font-sans mb-8">
-              <p>
-                Vous ne trouverez pas Ourse Brune sur les réseaux sociaux, incompatibles avec mes valeurs.
-              </p>
-              <p>
-                Mais vous pouvez vous abonner à la Newsletter (maximum 2 par an).
-              </p>
-              <p className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsPopupOpen(true)}
-                  className="text-stone-600 hover:text-black underline underline-offset-4 transition-colors cursor-pointer text-sm sm:text-base"
-                >
-                  Lien vers une pop-up simple d’inscription à la Newsletter
-                </button>
-              </p>
-            </div>
+          <div className="w-full bg-white pt-10 sm:pt-14 pb-0 flex flex-col items-center text-black">
+            
+            {/* 1. ACTUALITÉS & ÉVÉNEMENTS (VISUEL À GAUCHE, INFORMATIONS À DROITE SANS ENCADREMENT DE TABLEAU) */}
+            {events && events.length > 0 && (
+              <div className="w-full max-w-5xl px-4 sm:px-8 mb-12 sm:mb-16">
+                <div className="space-y-10 sm:space-y-12">
+                  {events.map((evt) => (
+                    <div
+                      key={evt.id}
+                      className="grid grid-cols-1 sm:grid-cols-12 gap-6 sm:gap-8 md:gap-10 items-center"
+                    >
+                      {/* Colonne Gauche : Visuel de l'événement */}
+                      <div className="sm:col-span-5 flex justify-center sm:justify-start">
+                        <div className="relative overflow-hidden rounded-xl border border-stone-200 shadow-md bg-stone-100 w-full max-w-[280px] sm:max-w-[340px] aspect-square flex items-center justify-center">
+                          <img
+                            src={evt.image || '/images/COCTEAU-MALEINE.JPG'}
+                            alt={evt.title || 'Visuel de l’événement'}
+                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                            loading="lazy"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Colonne Droite : Titre, date, description et liens utiles */}
+                      <div className="sm:col-span-7 flex flex-col justify-center text-left">
+                        {evt.date && (
+                          <span className="inline-block px-3 py-1 mb-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-stone-100 text-stone-800 border border-stone-300 w-fit">
+                            {evt.date}
+                          </span>
+                        )}
+
+                        {evt.title && (
+                          <h3 className="text-lg sm:text-xl md:text-2xl font-bold uppercase tracking-wider text-black font-sans mb-3">
+                            {evt.title}
+                          </h3>
+                        )}
+
+                        <p className="text-sm sm:text-base text-stone-700 leading-relaxed font-sans mb-6">
+                          {evt.description}
+                        </p>
+
+                        {evt.link && (
+                          <div>
+                            <a
+                              href={evt.link}
+                              target={evt.link.startsWith('http') ? '_blank' : '_self'}
+                              rel={evt.link.startsWith('http') ? 'noopener noreferrer' : undefined}
+                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-black hover:bg-stone-800 text-white font-bold tracking-wider text-xs sm:text-sm uppercase transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 cursor-pointer group"
+                            >
+                              <span>{evt.linkText || 'En savoir plus'}</span>
+                              <svg
+                                className="w-4 h-4 transform transition-transform group-hover:translate-x-1"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                />
+                              </svg>
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+
+            {/* 2. SECTION NEWSLETTER (Texte administrable dans Sanity + Formulaire) */}
+            {(() => {
+              const paragraphs = actualiteText
+                ? actualiteText.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+                : [
+                    'Vous ne trouverez pas Ourse Brune sur les réseaux sociaux, incompatibles avec mes valeurs.',
+                    'Mais vous pouvez vous abonner à la Newsletter (maximum 2 par an).',
+                  ]
+
+              return (
+                <div className="w-full max-w-3xl px-4 sm:px-8 space-y-4 text-black text-center text-sm sm:text-base md:text-lg leading-relaxed font-sans mb-8">
+                  {paragraphs.map((p, idx) => (
+                    <p key={idx}>{p}</p>
+                  ))}
+                </div>
+              )
+            })()}
 
             {/* Champ de saisie simple sans logo */}
             <div className="w-full max-w-md px-4 mb-12">
@@ -114,65 +180,7 @@ export default function NewsletterSection({ bannerTitle = 'ACTUALITÉS / NEWSLET
           </div>
         </div>
       </div>
-
-      {/* POP-UP SIMPLE D'INSCRIPTION À LA NEWSLETTER */}
-      {isPopupOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
-          onClick={() => setIsPopupOpen(false)}
-        >
-          <div
-            className="relative w-full max-w-md bg-white rounded-2xl p-6 sm:p-8 shadow-2xl border border-stone-200 text-black"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setIsPopupOpen(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 flex items-center justify-center transition-colors cursor-pointer"
-              aria-label="Fermer la pop-up"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            <h3 className="text-lg sm:text-xl font-bold uppercase tracking-wider text-black mb-2 text-center">
-              Inscription à la Newsletter
-            </h3>
-            <p className="text-xs sm:text-sm text-stone-600 mb-6 text-center leading-relaxed">
-              Restez informé(e) des prochaines créations et expositions (maximum 2 par an).
-            </p>
-
-            {popupSubscribed ? (
-              <div className="p-4 rounded-xl bg-stone-100 border border-stone-300 text-stone-900 text-sm font-medium text-center">
-                Votre inscription a bien été enregistrée. Merci !
-              </div>
-            ) : (
-              <form onSubmit={handlePopupSubscribe} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-black mb-1.5">
-                    Adresse email *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={popupEmail}
-                    onChange={(e) => setPopupEmail(e.target.value)}
-                    placeholder="votre@email.fr"
-                    className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden text-sm bg-white text-black placeholder-stone-400"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full py-3 rounded-lg bg-black hover:bg-stone-800 text-white font-bold tracking-wider text-xs sm:text-sm uppercase transition-colors cursor-pointer"
-                >
-                  S'inscrire
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
     </section>
   )
 }
+

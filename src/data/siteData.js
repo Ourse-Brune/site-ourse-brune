@@ -331,3 +331,16 @@ export const CONTACT_POLICY = {
   p3: "Pour éliminer le risque de casse, je porte une attention particulière à la livraison et aux solutions de fixation des œuvres.",
   p4: "Amis galeristes, si vous souhaitez exposer mes œuvres, n'hésitez pas à me contacter !",
 }
+
+export const DEFAULT_EVENTS = [
+  {
+    id: 'event-demo-atelier',
+    title: 'Exposition & Rencontre à l’Atelier',
+    date: 'Automne 2026',
+    image: '/images/COCTEAU-MALEINE.JPG',
+    description: "test de texte descriptif et un lien bateau pour valider les redirections vers d'autres pages.",
+    link: 'https://example.com',
+    linkText: 'Découvrir l’événement',
+    order: 1,
+  },
+]

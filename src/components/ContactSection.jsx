@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react'
 import { CONTACT_POLICY } from '../data/siteData'
 
-export default function ContactSection({ initialSubject, bannerTitle = 'CONTACT / COMMANDE' }) {
+export default function ContactSection({
+  initialSubject,
+  bannerTitle = 'CONTACT / COMMANDE',
+  contactText = '',
+}) {
   const [isOpen, setIsOpen] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -174,21 +178,25 @@ export default function ContactSection({ initialSubject, bannerTitle = 'CONTACT 
               )}
             </div>
 
-            {/* Modalités & délais de commande : texte sans style, pas dans un bloc, centré */}
-            <div className="w-full max-w-3xl px-4 sm:px-8 space-y-6 text-black text-center text-sm sm:text-base md:text-lg leading-relaxed font-sans mb-12">
-              <p>
-                Les pièces notées « Disponible » seront envoyées dès réception du règlement.
-              </p>
-              <p>
-                Pour celles notées « En commande », le délai de livraison est d'un mois maximum à partir de la commande. C'est le temps nécessaire à la fabrication. Chaque pièce est réalisée à la main et demande des heures de travail, puis vient la cuisson, avec son lot de surprises et parfois la nécessité de refaire la pièce selon les caprices du feu.
-              </p>
-              <p>
-                Pour éliminer le risque de casse, je porte une attention particulière à la livraison et aux solutions de fixation des œuvres.
-              </p>
-              <p>
-                Amis galeristes, si vous souhaitez exposer mes œuvres, n'hésitez pas à me contacter !
-              </p>
-            </div>
+            {/* Modalités & délais de commande : texte administrable dans Sanity */}
+            {(() => {
+              const paragraphs = contactText
+                ? contactText.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+                : [
+                    CONTACT_POLICY.p1,
+                    CONTACT_POLICY.p2,
+                    CONTACT_POLICY.p3,
+                    CONTACT_POLICY.p4,
+                  ]
+
+              return (
+                <div className="w-full max-w-3xl px-4 sm:px-8 space-y-6 text-black text-center text-sm sm:text-base md:text-lg leading-relaxed font-sans mb-12">
+                  {paragraphs.map((p, idx) => (
+                    <p key={idx}>{p}</p>
+                  ))}
+                </div>
+              )
+            })()}
 
             {/* FLÈCHE NOIRE PLEINE LARGEUR COLLÉE AU BANDEAU SUIVANT SANS AUCUN VIDE */}
             <button

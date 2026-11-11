@@ -100,7 +100,10 @@ function AtelierVideoPlayer() {
   )
 }
 
-export default function OurseBruneSection({ bannerTitle = 'OURSE BRUNE ?' }) {
+export default function OurseBruneSection({
+  bannerTitle = 'OURSE BRUNE ?',
+  storyText = '',
+}) {
   const [isOpen, setIsOpen] = useState(false)
 
   const toggle = () => setIsOpen(!isOpen)
@@ -110,6 +113,23 @@ export default function OurseBruneSection({ bannerTitle = 'OURSE BRUNE ?' }) {
     const el = document.getElementById('ourse-brune')
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
+
+  // Découpage dynamique des paragraphes depuis Sanity ou fallback sur OURSE_BRUNE_STORY
+  const paragraphs = storyText
+    ? storyText
+        .split(/\n\s*\n/)
+        .map((p) => p.trim())
+        .filter(Boolean)
+    : [
+        OURSE_BRUNE_STORY.p1,
+        OURSE_BRUNE_STORY.p2,
+        OURSE_BRUNE_STORY.p3,
+        OURSE_BRUNE_STORY.p4,
+        OURSE_BRUNE_STORY.p5,
+        OURSE_BRUNE_STORY.p6,
+        OURSE_BRUNE_STORY.p7,
+        OURSE_BRUNE_STORY.p8,
+      ]
 
   return (
     <section id="ourse-brune" className="w-full bg-white flex flex-col items-center scroll-mt-20">
@@ -132,31 +152,29 @@ export default function OurseBruneSection({ bannerTitle = 'OURSE BRUNE ?' }) {
             isOpen ? 'max-h-[6000px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
           }`}
         >
-          <div className="w-full bg-white pt-12 sm:pt-16 pb-0 flex flex-col items-center text-black">
-            {/* Texte de l'histoire Ourse Brune */}
-            <div className="w-full max-w-3xl px-4 sm:px-8 space-y-6 text-sm sm:text-base md:text-lg leading-relaxed text-center font-sans">
-              <p>{OURSE_BRUNE_STORY.p1}</p>
-              <p>{OURSE_BRUNE_STORY.p2}</p>
-              <p>{OURSE_BRUNE_STORY.p3}</p>
-              <p>{OURSE_BRUNE_STORY.p4}</p>
-              <p>{OURSE_BRUNE_STORY.p5}</p>
-              <p>{OURSE_BRUNE_STORY.p6}</p>
-              <p>{OURSE_BRUNE_STORY.p7}</p>
-              <p>{OURSE_BRUNE_STORY.p8}</p>
-            </div>
-
-            {/* PHOTO HISTORIQUE : Jean Cocteau & Marie-Madeleine Jolly */}
-            <div className="my-10 sm:my-12 flex flex-col items-center px-4 w-full">
-              <div className="overflow-hidden rounded-2xl shadow-xl border border-stone-200 max-w-lg w-full bg-stone-100">
-                <img
-                  src="/images/COCTEAU-MALEINE.JPG"
-                  alt="Jean Cocteau et Marie-Madeleine Jolly à l'atelier"
-                  className="w-full h-auto object-cover"
-                  loading="lazy"
-                />
-                <div className="p-3.5 bg-stone-900 text-stone-200 text-center text-xs sm:text-sm italic">
-                  Jean Cocteau &amp; Marie-Madeleine Jolly à l'atelier — fin des années 1950.
+          <div className="w-full bg-white pt-10 sm:pt-14 pb-0 flex flex-col items-center text-black">
+            {/* BLOC HISTOIRE : IMAGE À GAUCHE & TEXTE À DROITE (AU MÊME NIVEAU) */}
+            <div className="w-full max-w-6xl px-4 sm:px-8 flex flex-col md:flex-row items-center md:items-start justify-center gap-8 md:gap-10 lg:gap-14">
+              {/* PHOTO HISTORIQUE ALIGNÉE À GAUCHE */}
+              <div className="w-full md:w-5/12 lg:w-4/12 shrink-0 flex flex-col items-center">
+                <div className="overflow-hidden rounded-2xl shadow-xl border border-stone-200 w-full max-w-[360px] lg:max-w-[400px] bg-stone-100">
+                  <img
+                    src="/images/COCTEAU-MALEINE.JPG"
+                    alt="Jean Cocteau et Marie-Madeleine Jolly à l'atelier"
+                    className="w-full aspect-square object-cover"
+                    loading="lazy"
+                  />
+                  <div className="p-3 bg-stone-900 text-stone-200 text-center text-xs italic">
+                    Jean Cocteau &amp; Marie-Madeleine Jolly à l'atelier — fin des années 1950.
+                  </div>
                 </div>
+              </div>
+
+              {/* TEXTE DE L'HISTOIRE À SA DROITE — JUSTIFIÉ CENTRÉ CALIBRÉ SUR LA HAUTEUR DE L'IMAGE */}
+              <div className="w-full md:w-7/12 lg:w-8/12 space-y-2 sm:space-y-2.5 text-[11px] sm:text-[11.5px] md:text-[11.5px] lg:text-[12px] leading-relaxed text-justify-center hyphens-auto font-sans text-black">
+                {paragraphs.map((p, idx) => (
+                  <p key={idx}>{p}</p>
+                ))}
               </div>
             </div>
 

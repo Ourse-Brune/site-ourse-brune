@@ -22,29 +22,6 @@ export default function SeriesSection({ seriesList, onSelectDish }) {
     }
   }
 
-  const getStatusBadge = (status, color) => {
-    let textColor = 'text-amber-600'
-    let borderColor = 'border-amber-300'
-    let bgColor = 'bg-amber-50'
-
-    if (color === 'green') {
-      textColor = 'text-emerald-700'
-      borderColor = 'border-emerald-300'
-      bgColor = 'bg-emerald-50'
-    } else if (color === 'red') {
-      textColor = 'text-rose-700'
-      borderColor = 'border-rose-300'
-      bgColor = 'bg-rose-50'
-    }
-
-    return (
-      <span
-        className={`inline-block px-3 py-0.5 text-[11px] sm:text-xs font-bold tracking-wider uppercase rounded-full border ${textColor} ${borderColor} ${bgColor}`}
-      >
-        {status}
-      </span>
-    )
-  }
 
   return (
     <section id="series-section" className="w-full bg-white flex flex-col items-center">
@@ -132,22 +109,29 @@ export default function SeriesSection({ seriesList, onSelectDish }) {
                               <h3 className="text-sm sm:text-base font-extrabold tracking-wider text-stone-900 uppercase mb-1">
                                 {dish.name}
                               </h3>
-                              <p className="text-xs text-stone-600 font-medium mb-0.5">
-                                {dish.type}{dish.material ? `, ${dish.material}` : ''}
-                              </p>
-                              <p className="text-xs text-stone-500 mb-2">
-                                {dish.edition}
-                              </p>
+                              {dish.type && (
+                                <p className="text-xs text-stone-600 font-medium mb-0.5">
+                                  {dish.type}
+                                </p>
+                              )}
+                              {dish.material && (
+                                <p className="text-xs text-stone-600 font-medium mb-0.5">
+                                  {dish.material}
+                                </p>
+                              )}
+                              {dish.edition && (
+                                <p className="text-xs text-stone-500 mb-1.5">
+                                  {dish.edition}
+                                </p>
+                              )}
 
-                              {/* Badge de disponibilité */}
-                              <div>{getStatusBadge(dish.status, dish.statusColor)}</div>
+                              {/* État du produit (texte en gras sans bouton ni couleur) */}
+                              <p className="text-xs sm:text-[13px] font-bold tracking-wider text-stone-900 uppercase">
+                                {dish.status}
+                              </p>
                             </div>
                           ))}
                         </div>
-
-                        <p className="text-xs sm:text-sm text-stone-400 italic mb-6 text-center">
-                          Cliquez sur une pièce pour afficher les photos de détail
-                        </p>
                       </div>
                     </div>
 
