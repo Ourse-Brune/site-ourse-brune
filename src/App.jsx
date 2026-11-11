@@ -235,7 +235,7 @@ function App() {
       </main>
 
       {/* FOOTER */}
-      <div className="relative z-10 w-full">
+      <div className="relative z-10 w-full bg-black">
         <Footer />
       </div>
 

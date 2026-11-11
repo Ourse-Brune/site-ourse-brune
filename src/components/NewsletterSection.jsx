@@ -25,7 +25,7 @@ export default function NewsletterSection({
   }
 
   return (
-    <section id="actualites" className="w-full bg-white flex flex-col items-center scroll-mt-20">
+    <section id="actualites" className="w-full bg-black flex flex-col items-center scroll-mt-20">
       <div className="w-full flex flex-col">
         {/* BANDEAU ACTUALITÉS / NEWSLETTER (Noir) — PLEINE LARGEUR */}
         <button

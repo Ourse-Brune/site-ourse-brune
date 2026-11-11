@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 export default function SurMesureSection({
   bannerTitle = 'LE SUR-MESURE',
-  bannerImage = '/images/Bandeaux/BANDO_SUR-MESURE.jpg',
+  bannerImage = '/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg',
 }) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -30,8 +30,8 @@ export default function SurMesureSection({
             className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-101 block"
           />
 
-          {/* Image 100% pure et lumineuse au repos, très léger voile de 5% au survol */}
-          <div className="absolute inset-0 bg-transparent group-hover:bg-black/5 transition-colors duration-200"></div>
+          {/* Overlay sombre au repos pour détacher le texte blanc, s'efface au survol pour révéler l'image */}
+          <div className="absolute inset-0 bg-black/70 group-hover:bg-black/0 transition-colors duration-300 pointer-events-none"></div>
 
           {/* TEXTE DU BANDEAU SUPERPOSÉ (ÉDITABLE DANS SANITY) */}
           <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center pointer-events-none">

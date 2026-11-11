@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
 export default function SeriesSection({ seriesList, onSelectDish }) {
-  // MEXICO ! est ouvert par défaut comme sur la maquette
-  const [openSeries, setOpenSeries] = useState({ mexico: true })
+  // Par défaut, tous les bandeaux de séries sont repliés
+  const [openSeries, setOpenSeries] = useState({})
 
   const toggleSeries = (id) => {
     setOpenSeries((prev) => ({
@@ -52,8 +52,8 @@ export default function SeriesSection({ seriesList, onSelectDish }) {
                   }`}
                 />
 
-                {/* Image 100% pure et lumineuse au repos, très léger voile de 5% au survol */}
-                <div className="absolute inset-0 bg-transparent group-hover:bg-black/5 transition-colors duration-200"></div>
+                {/* Overlay sombre au repos pour détacher le texte blanc, s'efface au survol pour révéler l'image */}
+                <div className="absolute inset-0 bg-black/70 group-hover:bg-black/0 transition-colors duration-300 pointer-events-none"></div>
 
                 {/* TEXTE DU BANDEAU SUPERPOSÉ (ÉDITABLE DANS SANITY) */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center pointer-events-none">

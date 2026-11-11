@@ -4,7 +4,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="w-full bg-stone-950 text-stone-400 py-14 px-6 border-t border-stone-850">
+    <footer className="w-full bg-black text-stone-400 py-14 px-6 border-0">
       <div className="w-full max-w-4xl mx-auto flex flex-col items-center text-center gap-6">
         <button
           type="button"

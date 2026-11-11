@@ -40,13 +40,13 @@ export default function Header({ onNavigate }) {
     <>
       {/* 
         HEADER BANNER FULL-WIDTH (STICKY SOUS-JACENT)
-        - Sur mobile / portrait : respecte le ratio naturel (1366/750) pour afficher l'intégralité de l'ours sans aucun recadrage
-        - Sur écran large / desktop (landscape) : couvre 100% de la hauteur de l'écran (100dvh) pour masquer la section Mexico au chargement
+        - Couvre 100% de la hauteur de l'écran (100dvh) sur mobile comme sur desktop pour un rendu héroïque pleine page
+        - ACCUEIL-OURS 2.jpg (portrait 1456x1920) permet d'afficher l'ours avec toute sa hauteur sur smartphone
       */}
-      <header className="sticky top-0 z-0 w-full aspect-[1366/750] landscape:aspect-auto landscape:h-[100dvh] landscape:min-h-[100dvh] overflow-hidden bg-stone-900 select-none">
+      <header className="sticky top-0 z-0 w-full h-[100dvh] min-h-[100dvh] overflow-hidden bg-stone-900 select-none">
         <div className="relative w-full h-full flex items-center justify-center">
           <img
-            src="/images/HEADER-OURS.jpg"
+            src="/images/ACCUEIL-OURS 2.jpg"
             alt="Ourse Brune — Plat en céramique emblématique Ours"
             className="w-full h-full object-cover object-top"
             loading="eager"
@@ -55,9 +55,11 @@ export default function Header({ onNavigate }) {
 
           {/* 
             LOGO « Ourse brune — ART CÉRAMIQUE »
-            Centré horizontalement et verticalement entre le haut du crâne de l'ours et la bordure rouge supérieure
+            Centré dans l'espace en céramique blanche entre le haut du crâne de l'ours et la bordure rouge supérieure :
+            - 12.5% de hauteur sur smartphone / vue portrait
+            - 25% de hauteur sur écran d'ordinateur / vue paysage (landscape)
           */}
-          <div className="absolute top-[32%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[50%] sm:w-[44%] md:w-[38%] max-w-[460px] pointer-events-auto">
+          <div className="absolute top-[12.5%] landscape:top-[25%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[52%] sm:portrait:w-[44%] landscape:w-[36%] max-w-[440px] pointer-events-auto">
             <a
               href="#"
               onClick={(e) => {
