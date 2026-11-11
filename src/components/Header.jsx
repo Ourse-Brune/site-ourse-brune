@@ -43,7 +43,7 @@ export default function Header({ onNavigate }) {
         - Couvre 100% de la hauteur de l'écran (100dvh) sur mobile comme sur desktop pour un rendu héroïque pleine page
         - ACCUEIL-OURS 2.jpg (portrait 1456x1920) permet d'afficher l'ours avec toute sa hauteur sur smartphone
       */}
-      <header className="sticky top-0 z-0 w-full h-[calc(100dvh-12px)] min-h-[calc(100dvh-12px)] landscape:h-[100dvh] landscape:min-h-[100dvh] overflow-hidden bg-stone-900 select-none">
+      <header className="sticky top-0 z-0 w-full h-[100dvh] min-h-[100dvh] overflow-hidden bg-stone-900 select-none">
         <div className="relative w-full h-full flex items-center justify-center">
           <img
             src="/images/ACCUEIL-OURS 2.jpg"
