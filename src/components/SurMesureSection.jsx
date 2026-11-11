@@ -3,6 +3,8 @@ import { useState } from 'react'
 export default function SurMesureSection({
   bannerTitle = 'LE SUR-MESURE',
   bannerImage = '/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg',
+  onContactClick,
+  isCenter = false,
 }) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -20,6 +22,7 @@ export default function SurMesureSection({
         {/* BANDEAU LE SUR-MESURE — PLEINE LARGEUR SANS TEXTE DANS L'IMAGE */}
         <button
           type="button"
+          data-banner-id="sur-mesure"
           onClick={toggle}
           className="group relative w-full aspect-[1366/318] min-h-[140px] sm:min-h-[180px] md:min-h-[220px] lg:min-h-[260px] overflow-hidden bg-stone-900 cursor-pointer text-left focus:outline-hidden block leading-none"
           aria-expanded={isOpen}
@@ -30,11 +33,19 @@ export default function SurMesureSection({
             className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-101 block"
           />
 
-          {/* Overlay sombre au repos pour détacher le texte blanc, s'efface au survol pour révéler l'image */}
-          <div className="absolute inset-0 bg-black/70 group-hover:bg-black/0 transition-colors duration-300 pointer-events-none"></div>
+          {/* Overlay sombre au repos, s'efface au survol ou au centre de l'écran sur mobile */}
+          <div
+            className={`absolute inset-0 bg-black/70 group-hover:bg-black/0 transition-all duration-500 pointer-events-none ${
+              isCenter ? 'opacity-0' : 'opacity-100'
+            }`}
+          ></div>
 
-          {/* TEXTE DU BANDEAU SUPERPOSÉ (ÉDITABLE DANS SANITY) */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center pointer-events-none">
+          {/* TEXTE DU BANDEAU SUPERPOSÉ (S'EFFACE AU SURVOL SOURIS OU AU CENTRE SUR MOBILE) */}
+          <div
+            className={`absolute inset-0 flex flex-col items-center justify-center p-4 text-center pointer-events-none transition-all duration-500 group-hover:opacity-0 ${
+              isCenter ? 'opacity-0' : 'opacity-100'
+            }`}
+          >
             <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-normal tracking-[0.16em] sm:tracking-[0.22em] md:tracking-[0.28em] text-white uppercase drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] font-sans">
               {bannerTitle}
             </h2>

@@ -49,7 +49,7 @@ export default function ContactSection({
           className="group relative w-full py-10 sm:py-14 bg-[#fba700] hover:bg-[#e69800] transition-colors duration-200 cursor-pointer flex items-center justify-center text-center px-6 block leading-none"
           aria-expanded={isOpen}
         >
-          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-normal tracking-[0.14em] sm:tracking-[0.2em] text-white uppercase font-sans">
+          <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-normal tracking-[0.14em] sm:tracking-[0.2em] text-white uppercase font-sans">
             {bannerTitle}
           </h2>
         </button>

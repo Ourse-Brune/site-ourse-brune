@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function SeriesSection({ seriesList, onSelectDish }) {
+export default function SeriesSection({ seriesList, onSelectDish, activeCenterId }) {
   // Par défaut, tous les bandeaux de séries sont repliés
   const [openSeries, setOpenSeries] = useState({})
 
@@ -30,12 +30,14 @@ export default function SeriesSection({ seriesList, onSelectDish }) {
         {seriesList.map((serie) => {
           const hasItems = Boolean(serie.items && serie.items.length > 0)
           const isOpen = hasItems && !!openSeries[serie.id]
+          const isCenter = activeCenterId === serie.id
 
           return (
             <div key={serie.id} id={`series-${serie.id}`} className="w-full flex flex-col scroll-mt-20">
               {/* BANDEAU DE SÉRIE — PLEINE LARGEUR D'ÉCRAN SANS TEXTE INCRUSTÉ */}
               <button
                 type="button"
+                data-banner-id={serie.id}
                 onClick={() => hasItems && toggleSeries(serie.id)}
                 className={`group relative w-full aspect-[1366/318] min-h-[140px] sm:min-h-[180px] md:min-h-[220px] lg:min-h-[260px] overflow-hidden bg-stone-900 text-left focus:outline-hidden block leading-none ${
                   hasItems ? 'cursor-pointer' : 'cursor-default'
@@ -52,11 +54,19 @@ export default function SeriesSection({ seriesList, onSelectDish }) {
                   }`}
                 />
 
-                {/* Overlay sombre au repos pour détacher le texte blanc, s'efface au survol pour révéler l'image */}
-                <div className="absolute inset-0 bg-black/70 group-hover:bg-black/0 transition-colors duration-300 pointer-events-none"></div>
+                {/* Overlay sombre au repos pour détacher le texte blanc, s'efface au survol (souris) ou au centre de l'écran (mobile) */}
+                <div
+                  className={`absolute inset-0 bg-black/70 group-hover:bg-black/0 transition-all duration-500 pointer-events-none ${
+                    isCenter ? 'opacity-0' : 'opacity-100'
+                  }`}
+                ></div>
 
-                {/* TEXTE DU BANDEAU SUPERPOSÉ (ÉDITABLE DANS SANITY) */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center pointer-events-none">
+                {/* TEXTE DU BANDEAU SUPERPOSÉ (S'EFFACE AU SURVOL SOURIS OU AU CENTRE SUR MOBILE) */}
+                <div
+                  className={`absolute inset-0 flex flex-col items-center justify-center p-4 text-center pointer-events-none transition-all duration-500 group-hover:opacity-0 ${
+                    isCenter ? 'opacity-0' : 'opacity-100'
+                  }`}
+                >
                   <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-normal tracking-[0.2em] sm:tracking-[0.25em] md:tracking-[0.3em] text-white uppercase drop-shadow-[0_2px_14px_rgba(0,0,0,0.85)] font-sans">
                     {serie.bannerText || serie.title}
                   </h2>

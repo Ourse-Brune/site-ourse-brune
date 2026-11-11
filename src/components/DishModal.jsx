@@ -117,13 +117,10 @@ export default function DishModal({ dish, onClose }) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md select-none animate-in fade-in duration-200"
       onClick={onClose}
     >
-      {/* En-tête discret avec titre et compteur */}
+      {/* En-tête discret avec nom de la pièce */}
       <div className="absolute top-5 sm:top-6 left-6 sm:left-10 z-20 flex flex-col pointer-events-none">
         <span className="text-sm sm:text-base font-bold tracking-widest text-white uppercase font-sans drop-shadow-md">
           {dish.name}
-        </span>
-        <span className="text-xs text-white/60 tracking-wider">
-          {images.length > 1 ? `Vue ${currentIndex + 1} sur ${images.length}` : 'Vue de détail'}
         </span>
       </div>
 
@@ -139,9 +136,42 @@ export default function DishModal({ dish, onClose }) {
         </svg>
       </button>
 
+      {/* FLÈCHES BLANCHES LATÉRALES DE DÉFILEMENT (GAUCHE ET DROITE) */}
+      {images.length > 1 && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+          }}
+          className="absolute left-3 sm:left-6 md:left-8 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/40 hover:bg-black/75 text-white flex items-center justify-center transition-all cursor-pointer border border-white/20 hover:scale-110 active:scale-95 shadow-xl backdrop-blur-xs"
+          aria-label="Photo précédente"
+        >
+          <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      )}
+
+      {images.length > 1 && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+          }}
+          className="absolute right-3 sm:right-6 md:right-8 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/40 hover:bg-black/75 text-white flex items-center justify-center transition-all cursor-pointer border border-white/20 hover:scale-110 active:scale-95 shadow-xl backdrop-blur-xs"
+          aria-label="Photo suivante"
+        >
+          <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      )}
+
       {/* 
         ZONE D'AFFICHAGE ET DE GLISSEMENT (TOUCH & SOURIS)
-        Sans flèches latérales, navigation fluide par swipe / drag
+        Navigation fluide par swipe / drag et flèches
       */}
       <div
         className="relative w-full h-full flex items-center justify-center p-4 sm:p-12 md:p-16 overflow-hidden touch-pan-y"
@@ -175,8 +205,8 @@ export default function DishModal({ dish, onClose }) {
       </div>
 
       {/* 
-        INDICATEURS DE PAGINATION (PETITS POINTS EN BAS)
-        Permettent de sauter directement de l'image 1 à la 3 en un clic
+        INDICATEURS DE PAGINATION (UNIQUEMENT LES PETITS POINTS EN BAS)
+        Permettent de choisir directement l'image
       */}
       {images.length > 1 && (
         <div
@@ -203,9 +233,6 @@ export default function DishModal({ dish, onClose }) {
               />
             </button>
           ))}
-          <span className="text-[11px] text-white/70 font-mono ml-2 select-none">
-            {currentIndex + 1}/{images.length}
-          </span>
         </div>
       )}
     </div>

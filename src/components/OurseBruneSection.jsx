@@ -92,10 +92,6 @@ function AtelierVideoPlayer() {
           </div>
         )}
       </div>
-
-      <p className="mt-3 text-xs sm:text-sm text-stone-500 italic text-center">
-        Immersion au cœur de l'atelier Ourse Brune
-      </p>
     </div>
   )
 }
@@ -117,19 +113,19 @@ export default function OurseBruneSection({
   // Découpage dynamique des paragraphes depuis Sanity ou fallback sur OURSE_BRUNE_STORY
   const paragraphs = storyText
     ? storyText
-        .split(/\n\s*\n/)
-        .map((p) => p.trim())
-        .filter(Boolean)
+      .split(/\n\s*\n/)
+      .map((p) => p.trim())
+      .filter(Boolean)
     : [
-        OURSE_BRUNE_STORY.p1,
-        OURSE_BRUNE_STORY.p2,
-        OURSE_BRUNE_STORY.p3,
-        OURSE_BRUNE_STORY.p4,
-        OURSE_BRUNE_STORY.p5,
-        OURSE_BRUNE_STORY.p6,
-        OURSE_BRUNE_STORY.p7,
-        OURSE_BRUNE_STORY.p8,
-      ]
+      OURSE_BRUNE_STORY.p1,
+      OURSE_BRUNE_STORY.p2,
+      OURSE_BRUNE_STORY.p3,
+      OURSE_BRUNE_STORY.p4,
+      OURSE_BRUNE_STORY.p5,
+      OURSE_BRUNE_STORY.p6,
+      OURSE_BRUNE_STORY.p7,
+      OURSE_BRUNE_STORY.p8,
+    ]
 
   return (
     <section id="ourse-brune" className="w-full bg-white flex flex-col items-center scroll-mt-20">
@@ -141,16 +137,15 @@ export default function OurseBruneSection({
           className="group relative w-full py-10 sm:py-14 bg-[#800e18] hover:bg-[#6e0c14] transition-colors duration-200 cursor-pointer flex items-center justify-center text-center px-6 block leading-none"
           aria-expanded={isOpen}
         >
-          <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-normal tracking-[0.16em] sm:tracking-[0.22em] text-white uppercase font-sans">
+          <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-normal tracking-[0.14em] sm:tracking-[0.2em] text-white uppercase font-sans">
             {bannerTitle}
           </h2>
         </button>
 
         {/* CONTENU DÉPLIABLE DE L'HISTOIRE DE L'ATELIER */}
         <div
-          className={`transition-all duration-500 ease-in-out overflow-hidden ${
-            isOpen ? 'max-h-[6000px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
-          }`}
+          className={`transition-all duration-500 ease-in-out overflow-hidden ${isOpen ? 'max-h-[6000px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+            }`}
         >
           <div className="w-full bg-white pt-10 sm:pt-14 pb-0 flex flex-col items-center text-black">
             {/* BLOC HISTOIRE : IMAGE À GAUCHE & TEXTE À DROITE (AU MÊME NIVEAU) */}
@@ -164,8 +159,10 @@ export default function OurseBruneSection({
                     className="w-full aspect-square object-cover"
                     loading="lazy"
                   />
-                  <div className="p-3 bg-stone-900 text-stone-200 text-center text-xs italic">
-                    Jean Cocteau &amp; Marie-Madeleine Jolly à l'atelier — fin des années 1950.
+                  <div className="p-3 bg-stone-900 text-stone-200 text-center text-xs italic leading-relaxed">
+                    Jean Cocteau et Marie-Madeleine Jolly dans l'atelier de Villefranche sur mer en 1958.
+                    <br />
+                    Photo : studio M.PAUT.
                   </div>
                 </div>
               </div>
@@ -198,6 +195,6 @@ export default function OurseBruneSection({
           </div>
         </div>
       </div>
-    </section>
+    </section >
   )
 }

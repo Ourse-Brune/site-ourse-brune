@@ -84,17 +84,17 @@ export default function Header({ onNavigate }) {
               const el = document.getElementById('series-section')
               if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
             }}
-            className="absolute bottom-2.5 sm:bottom-3 left-1/2 -translate-x-1/2 z-20 p-2 text-white/90 hover:text-white transition-opacity animate-bounce cursor-pointer portrait:flex landscape:hidden md:hidden flex-col items-center select-none"
+            className="absolute bottom-10 sm:bottom-12 left-1/2 -translate-x-1/2 z-20 p-2 text-white/90 hover:text-white transition-opacity animate-bounce cursor-pointer portrait:flex landscape:hidden md:hidden flex-col items-center select-none"
             title="Défiler vers le bas"
             aria-label="Défiler vers le bas"
           >
             <svg
-              className="w-5 h-5 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]"
+              className="w-10 h-10 sm:w-12 sm:h-12 drop-shadow-[0_3px_8px_rgba(0,0,0,0.9)]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
         </div>

@@ -52,6 +52,44 @@ function App() {
   const [actualiteText, setActualiteText] = useState('')
   const [selectedDish, setSelectedDish] = useState(null)
   const [contactSubject, setContactSubject] = useState("Commande d'une pièce")
+  const [activeCenterId, setActiveCenterId] = useState(null)
+
+  // Détecte le bandeau situé au milieu de l'écran sur mobile/tactile
+  useEffect(() => {
+    const isTouchOrMobile = () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia('(hover: none), (max-width: 1024px)').matches
+
+    const handleScroll = () => {
+      if (!isTouchOrMobile()) {
+        setActiveCenterId(null)
+        return
+      }
+
+      const centerY = window.innerHeight / 2
+      const banners = document.querySelectorAll('[data-banner-id]')
+      let foundId = null
+
+      for (const b of banners) {
+        const rect = b.getBoundingClientRect()
+        if (rect.top <= centerY && rect.bottom >= centerY) {
+          foundId = b.getAttribute('data-banner-id')
+          break
+        }
+      }
+
+      setActiveCenterId(foundId)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('resize', handleScroll, { passive: true })
+    handleScroll()
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleScroll)
+    }
+  }, [])
 
   useEffect(() => {
     async function loadData() {
@@ -204,6 +242,7 @@ function App() {
         <SeriesSection
           seriesList={seriesList}
           onSelectDish={setSelectedDish}
+          activeCenterId={activeCenterId}
         />
 
         {/* LE SUR-MESURE */}
@@ -211,6 +250,7 @@ function App() {
           bannerTitle={siteBanners.surMesureTitle}
           bannerImage={siteBanners.surMesureBanner}
           onContactClick={handleContactClick}
+          isCenter={activeCenterId === 'sur-mesure'}
         />
 
         {/* OURSE BRUNE ? (Bandeau Bordeaux) */}
