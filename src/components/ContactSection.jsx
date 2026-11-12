@@ -1,35 +1,59 @@
 import { useState, useEffect } from 'react'
 import { CONTACT_POLICY } from '../data/siteData'
+import { formatTypography } from '../utils/typography'
+import { TRANSLATIONS } from '../data/translations'
 
 export default function ContactSection({
   initialSubject,
   bannerTitle = 'CONTACT / COMMANDE',
   contactText = '',
+  contactTextEn = '',
+  isOpen: externalIsOpen,
+  onToggle: externalOnToggle,
+  language = 'fr',
 }) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [internalIsOpen, setInternalIsOpen] = useState(false)
+  const isControlled = externalIsOpen !== undefined
+  const isOpen = isControlled ? externalIsOpen : internalIsOpen
+  const t = TRANSLATIONS[language] || TRANSLATIONS.fr
+  const isDefaultTitle = !bannerTitle || bannerTitle.replace(/[\s\u00A0]+/g, ' ').trim().toUpperCase().includes('CONTACT')
+  const displayTitle = isDefaultTitle ? t.banners.contact : bannerTitle
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    subject: initialSubject || "Commande d'une pièce",
+    subject: initialSubject || t.contact.subjectPiece,
     message: '',
   })
   const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
     if (initialSubject) {
-      setIsOpen(true)
+      if (!isControlled) {
+        setInternalIsOpen(true)
+      }
       setFormData((prev) => ({
         ...prev,
-        subject: initialSubject || prev.subject,
+        subject: initialSubject,
       }))
     }
-  }, [initialSubject])
+  }, [initialSubject, isControlled])
 
-  const toggle = () => setIsOpen(!isOpen)
+  const toggle = () => {
+    if (isControlled) {
+      externalOnToggle && externalOnToggle(!isOpen)
+    } else {
+      setInternalIsOpen(!isOpen)
+    }
+  }
 
   const collapse = () => {
-    setIsOpen(false)
+    if (isControlled) {
+      externalOnToggle && externalOnToggle(false)
+    } else {
+      setInternalIsOpen(false)
+    }
     const el = document.getElementById('contact')
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
@@ -38,6 +62,18 @@ export default function ContactSection({
     e.preventDefault()
     setSubmitted(true)
   }
+
+  const defaultParagraphs = [
+    t.contact.p1,
+    t.contact.p2,
+    t.contact.p3,
+    t.contact.p4,
+  ]
+
+  const customContact = language === 'en' ? contactTextEn : contactText
+  const paragraphs = customContact
+    ? customContact.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+    : defaultParagraphs
 
   return (
     <section id="contact" className="w-full bg-white flex flex-col items-center scroll-mt-20">
@@ -50,7 +86,7 @@ export default function ContactSection({
           aria-expanded={isOpen}
         >
           <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-normal tracking-[0.14em] sm:tracking-[0.2em] text-white uppercase font-sans">
-            {bannerTitle}
+            {formatTypography(displayTitle, language)}
           </h2>
         </button>
 
@@ -61,20 +97,27 @@ export default function ContactSection({
           }`}
         >
           <div className="w-full bg-white pt-12 sm:pt-16 pb-0 flex flex-col items-center text-black">
-            {/* Texte d'introduction : sans style et pas dans un bloc */}
+            {/* Modalités et délais de commande */}
+            <div className="w-full max-w-3xl px-4 sm:px-8 space-y-6 text-black text-center text-sm sm:text-base md:text-lg leading-relaxed font-sans mb-8">
+              {paragraphs.map((p, idx) => (
+                <p key={idx}>{formatTypography(p, language)}</p>
+              ))}
+            </div>
+
+            {/* Texte d'introduction */}
             <div className="w-full max-w-3xl px-4 sm:px-8 text-black text-center text-sm sm:text-base md:text-lg leading-relaxed font-sans mb-8">
-              <p>Pour toute question ou commande, merci d’utiliser le formulaire ici</p>
+              <p>{formatTypography(t.contact.intro, language)}</p>
             </div>
 
             {/* Formulaire simple (sans partie "pièce concernée") */}
-            <div className="w-full max-w-xl px-4 mb-10">
+            <div className="w-full max-w-xl px-4 mb-12">
               {submitted ? (
                 <div className="p-8 sm:p-10 rounded-2xl bg-stone-50 border border-stone-200 text-center flex flex-col items-center">
                   <h4 className="text-xl font-bold text-black mb-2">
-                    Merci pour votre message !
+                    {t.contact.successTitle}
                   </h4>
                   <p className="text-sm sm:text-base text-stone-600 max-w-md leading-relaxed">
-                    Votre demande a bien été transmise à l'atelier Ourse Brune. Je vous répondrai dans les plus brefs délais.
+                    {t.contact.successText}
                   </p>
                   <button
                     type="button"
@@ -84,13 +127,13 @@ export default function ContactSection({
                         name: '',
                         email: '',
                         phone: '',
-                        subject: "Commande d'une pièce",
+                        subject: t.contact.subjectPiece,
                         message: '',
                       })
                     }}
                     className="mt-6 px-6 py-2.5 rounded-full bg-black hover:bg-stone-800 text-white text-xs font-semibold tracking-wider uppercase transition-colors cursor-pointer"
                   >
-                    Envoyer un autre message
+                    {t.contact.sendAnother}
                   </button>
                 </div>
               ) : (
@@ -98,27 +141,27 @@ export default function ContactSection({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-black mb-1.5">
-                        Nom complet *
+                        {t.contact.nameLabel}
                       </label>
                       <input
                         type="text"
                         required
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="Votre nom"
+                        placeholder={t.contact.namePlaceholder}
                         className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-black mb-1.5">
-                        Adresse Email *
+                        {t.contact.emailLabel}
                       </label>
                       <input
                         type="email"
                         required
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="votre@email.fr"
+                        placeholder={t.contact.emailPlaceholder}
                         className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white"
                       />
                     </div>
@@ -127,43 +170,43 @@ export default function ContactSection({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-black mb-1.5">
-                        Téléphone (optionnel)
+                        {t.contact.phoneLabel}
                       </label>
                       <input
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        placeholder="06 12 34 56 78"
+                        placeholder={t.contact.phonePlaceholder}
                         className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-black mb-1.5">
-                        Objet de votre demande *
+                        {t.contact.subjectLabel}
                       </label>
                       <select
                         value={formData.subject}
                         onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                         className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white"
                       >
-                        <option value="Commande d'une pièce">Commande d'une pièce</option>
-                        <option value="Projet sur-mesure">Projet sur-mesure / Fresque</option>
-                        <option value="Galerie & Exposition">Galerie & Exposition</option>
-                        <option value="Autre demande">Autre demande</option>
+                        <option value={t.contact.subjectPiece}>{t.contact.subjectPiece}</option>
+                        <option value={t.contact.subjectCustom}>{t.contact.subjectCustom}</option>
+                        <option value={t.contact.subjectGallery}>{t.contact.subjectGallery}</option>
+                        <option value={t.contact.subjectOther}>{t.contact.subjectOther}</option>
                       </select>
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-black mb-1.5">
-                      Message *
+                      {t.contact.messageLabel}
                     </label>
                     <textarea
                       required
                       rows={4}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      placeholder="Précisez votre demande, questions ou souhaits particuliers..."
+                      placeholder={t.contact.messagePlaceholder}
                       className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white"
                     ></textarea>
                   </div>
@@ -172,43 +215,23 @@ export default function ContactSection({
                     type="submit"
                     className="w-full py-3.5 rounded-lg bg-black hover:bg-stone-800 text-white font-bold tracking-wider uppercase text-sm shadow-md transition-all duration-200 cursor-pointer"
                   >
-                    Envoyer ma demande
+                    {t.contact.submitBtn}
                   </button>
                 </form>
               )}
             </div>
-
-            {/* Modalités & délais de commande : texte administrable dans Sanity */}
-            {(() => {
-              const paragraphs = contactText
-                ? contactText.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
-                : [
-                    CONTACT_POLICY.p1,
-                    CONTACT_POLICY.p2,
-                    CONTACT_POLICY.p3,
-                    CONTACT_POLICY.p4,
-                  ]
-
-              return (
-                <div className="w-full max-w-3xl px-4 sm:px-8 space-y-6 text-black text-center text-sm sm:text-base md:text-lg leading-relaxed font-sans mb-12">
-                  {paragraphs.map((p, idx) => (
-                    <p key={idx}>{p}</p>
-                  ))}
-                </div>
-              )
-            })()}
 
             {/* FLÈCHE NOIRE PLEINE LARGEUR COLLÉE AU BANDEAU SUIVANT SANS AUCUN VIDE */}
             <button
               type="button"
               onClick={collapse}
               className="w-full block border-0 p-0 m-0 bg-transparent cursor-pointer transition-opacity duration-200 hover:opacity-85 focus:outline-hidden leading-none select-none"
-              title="Replier la section"
-              aria-label="Replier la section"
+              title={t.contact.collapse}
+              aria-label={t.contact.collapse}
             >
               <img
                 src="/images/FLECHE-NOIRE.png"
-                alt="Replier"
+                alt={t.contact.collapse}
                 className="w-full h-auto block select-none pointer-events-none"
               />
             </button>

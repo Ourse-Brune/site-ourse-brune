@@ -1,4 +1,9 @@
-export default function Footer() {
+import { formatTypography } from '../utils/typography'
+import { TRANSLATIONS } from '../data/translations'
+
+export default function Footer({ language = 'fr' }) {
+  const t = TRANSLATIONS[language] || TRANSLATIONS.fr
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -16,23 +21,25 @@ export default function Footer() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
             </svg>
           </div>
-          <span>Haut de page</span>
+          <span>{t.footer.backToTop}</span>
         </button>
 
         <div className="w-16 h-px bg-stone-800"></div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <p className="text-sm sm:text-base font-semibold tracking-wider text-stone-200 uppercase">
-            OURSE BRUNE — ART CÉRAMIQUE
+            {t.footer.title}
           </p>
           <p className="text-xs sm:text-sm text-stone-500">
-            Atelier d'art céramique contemporain • Drôme, France
+            {formatTypography(t.footer.subtitle, language)}
+          </p>
+          <p className="text-xs sm:text-sm text-stone-500">
+            {formatTypography(t.footer.credits, language)}
+          </p>
+          <p className="text-xs sm:text-sm text-stone-500">
+            {formatTypography(`© ${new Date().getFullYear()} ${t.footer.copyright}`, language)}
           </p>
         </div>
-
-        <p className="text-[11px] text-stone-600">
-          © {new Date().getFullYear()} Ourse Brune. Tous droits réservés. Reproduction interdite sans autorisation.
-        </p>
       </div>
     </footer>
   )

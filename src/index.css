@@ -7,6 +7,14 @@
   --font-diplomata: 'Diplomata SC', cursive;
 }
 
+/* Désactivation globale des césures (aucun mot coupé avec un tiret sur tout le site) */
+*, *::before, *::after {
+  hyphens: none !important;
+  -webkit-hyphens: none !important;
+  -moz-hyphens: none !important;
+  -ms-hyphens: none !important;
+}
+
 .text-justify-center {
   text-align: justify;
   text-align-last: center;

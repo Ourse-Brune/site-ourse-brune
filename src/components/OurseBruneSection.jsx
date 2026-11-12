@@ -1,9 +1,12 @@
 import { useState, useRef } from 'react'
 import { OURSE_BRUNE_STORY } from '../data/siteData'
+import { formatTypography } from '../utils/typography'
+import { TRANSLATIONS } from '../data/translations'
 
-function AtelierVideoPlayer() {
+function AtelierVideoPlayer({ language = 'fr' }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const videoRef = useRef(null)
+  const t = TRANSLATIONS[language] || TRANSLATIONS.fr
 
   const togglePlay = () => {
     if (!videoRef.current) return
@@ -56,7 +59,7 @@ function AtelierVideoPlayer() {
           <button
             type="button"
             onClick={togglePlay}
-            aria-label="Lancer la vidéo de l'atelier"
+            aria-label={t.ourseBrune.playVideo}
             className="absolute inset-0 flex items-center justify-center bg-black/35 hover:bg-black/45 transition-colors cursor-pointer group/btn"
           >
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/90 hover:bg-white text-stone-900 flex items-center justify-center shadow-2xl backdrop-blur-md transition-all duration-300 transform group-hover/btn:scale-110 active:scale-95 pl-1.5">
@@ -74,15 +77,15 @@ function AtelierVideoPlayer() {
             <div
               className="absolute inset-0 pointer-events-auto cursor-pointer"
               onClick={togglePlay}
-              title="Cliquer pour mettre en pause"
+              title={t.ourseBrune.pauseVideo}
             />
 
             {/* Bouton plein écran en haut à droite */}
             <button
               type="button"
               onClick={handleFullscreen}
-              aria-label="Plein écran"
-              title="Afficher en plein écran"
+              aria-label={t.ourseBrune.fullscreen}
+              title={t.ourseBrune.fullscreen}
               className="relative z-10 w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all cursor-pointer pointer-events-auto shadow-lg backdrop-blur-xs hover:scale-105 active:scale-95 border border-white/20"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,33 +102,52 @@ function AtelierVideoPlayer() {
 export default function OurseBruneSection({
   bannerTitle = 'OURSE BRUNE ?',
   storyText = '',
+  storyTextEn = '',
+  isOpen: externalIsOpen,
+  onToggle: externalOnToggle,
+  language = 'fr',
 }) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [internalIsOpen, setInternalIsOpen] = useState(false)
+  const isControlled = externalIsOpen !== undefined
+  const isOpen = isControlled ? externalIsOpen : internalIsOpen
+  const t = TRANSLATIONS[language] || TRANSLATIONS.fr
+  const isDefaultTitle = !bannerTitle || bannerTitle.replace(/[\s\u00A0]+/g, ' ').trim().toUpperCase().startsWith('OURSE BRUNE')
+  const displayTitle = isDefaultTitle ? t.banners.ourseBrune : bannerTitle
 
-  const toggle = () => setIsOpen(!isOpen)
+  const toggle = () => {
+    if (isControlled) {
+      externalOnToggle && externalOnToggle(!isOpen)
+    } else {
+      setInternalIsOpen(!isOpen)
+    }
+  }
 
   const collapse = () => {
-    setIsOpen(false)
+    if (isControlled) {
+      externalOnToggle && externalOnToggle(false)
+    } else {
+      setInternalIsOpen(false)
+    }
     const el = document.getElementById('ourse-brune')
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  // Découpage dynamique des paragraphes depuis Sanity ou fallback sur OURSE_BRUNE_STORY
-  const paragraphs = storyText
-    ? storyText
-      .split(/\n\s*\n/)
-      .map((p) => p.trim())
-      .filter(Boolean)
-    : [
-      OURSE_BRUNE_STORY.p1,
-      OURSE_BRUNE_STORY.p2,
-      OURSE_BRUNE_STORY.p3,
-      OURSE_BRUNE_STORY.p4,
-      OURSE_BRUNE_STORY.p5,
-      OURSE_BRUNE_STORY.p6,
-      OURSE_BRUNE_STORY.p7,
-      OURSE_BRUNE_STORY.p8,
-    ]
+  // Découpage dynamique des paragraphes
+  const defaultParagraphs = [
+    t.ourseBrune.p1,
+    t.ourseBrune.p2,
+    t.ourseBrune.p3,
+    t.ourseBrune.p4,
+    t.ourseBrune.p5,
+    t.ourseBrune.p6,
+    t.ourseBrune.p7,
+    t.ourseBrune.p8,
+  ]
+
+  const customText = language === 'en' ? storyTextEn : storyText
+  const paragraphs = customText
+    ? customText.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+    : defaultParagraphs
 
   return (
     <section id="ourse-brune" className="w-full bg-white flex flex-col items-center scroll-mt-20">
@@ -138,7 +160,7 @@ export default function OurseBruneSection({
           aria-expanded={isOpen}
         >
           <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-normal tracking-[0.14em] sm:tracking-[0.2em] text-white uppercase font-sans">
-            {bannerTitle}
+            {formatTypography(displayTitle, language)}
           </h2>
         </button>
 
@@ -148,47 +170,47 @@ export default function OurseBruneSection({
             }`}
         >
           <div className="w-full bg-white pt-10 sm:pt-14 pb-0 flex flex-col items-center text-black">
-            {/* BLOC HISTOIRE : IMAGE À GAUCHE & TEXTE À DROITE (AU MÊME NIVEAU) */}
+            {/* BLOC HISTOIRE : IMAGE À GAUCHE ET TEXTE À DROITE (AU MÊME NIVEAU) */}
             <div className="w-full max-w-6xl px-4 sm:px-8 flex flex-col md:flex-row items-center md:items-start justify-center gap-8 md:gap-10 lg:gap-14">
               {/* PHOTO HISTORIQUE ALIGNÉE À GAUCHE */}
               <div className="w-full md:w-5/12 lg:w-4/12 shrink-0 flex flex-col items-center">
                 <div className="overflow-hidden rounded-2xl shadow-xl border border-stone-200 w-full max-w-[360px] lg:max-w-[400px] bg-stone-100">
                   <img
                     src="/images/COCTEAU-MALEINE.JPG"
-                    alt="Jean Cocteau et Marie-Madeleine Jolly à l'atelier"
+                    alt={t.ourseBrune.caption1}
                     className="w-full aspect-square object-cover"
                     loading="lazy"
                   />
                   <div className="p-3 bg-stone-900 text-stone-200 text-center text-xs italic leading-relaxed">
-                    Jean Cocteau et Marie-Madeleine Jolly dans l'atelier de Villefranche sur mer en 1958.
+                    {formatTypography(t.ourseBrune.caption1, language)}
                     <br />
-                    Photo : studio M.PAUT.
+                    {formatTypography(t.ourseBrune.caption2, language)}
                   </div>
                 </div>
               </div>
 
-              {/* TEXTE DE L'HISTOIRE À SA DROITE — JUSTIFIÉ CENTRÉ CALIBRÉ SUR LA HAUTEUR DE L'IMAGE */}
-              <div className="w-full md:w-7/12 lg:w-8/12 space-y-2 sm:space-y-2.5 text-[11px] sm:text-[11.5px] md:text-[11.5px] lg:text-[12px] leading-relaxed text-justify-center hyphens-auto font-sans text-black">
+              {/* TEXTE DE L'HISTOIRE À SA DROITE — ALIGNÉ À GAUCHE */}
+              <div className="w-full md:w-7/12 lg:w-8/12 space-y-4 sm:space-y-5 text-sm sm:text-base md:text-lg leading-relaxed text-left hyphens-none font-sans text-black">
                 {paragraphs.map((p, idx) => (
-                  <p key={idx}>{p}</p>
+                  <p key={idx}>{formatTypography(p, language)}</p>
                 ))}
               </div>
             </div>
 
             {/* VIDÉO DE L'ATELIER OURSE BRUNE AVEC GROS BOUTON PLAY ET PLEIN ÉCRAN */}
-            <AtelierVideoPlayer />
+            <AtelierVideoPlayer language={language} />
 
             {/* FLÈCHE NOIRE PLEINE LARGEUR COLLÉE AU BANDEAU SUIVANT SANS AUCUN VIDE */}
             <button
               type="button"
               onClick={collapse}
               className="w-full block border-0 p-0 m-0 bg-transparent cursor-pointer transition-opacity duration-200 hover:opacity-85 focus:outline-hidden leading-none select-none"
-              title="Replier la section"
-              aria-label="Replier la section"
+              title={t.ourseBrune.collapse}
+              aria-label={t.ourseBrune.collapse}
             >
               <img
                 src="/images/FLECHE-NOIRE.png"
-                alt="Replier"
+                alt={t.ourseBrune.collapse}
                 className="w-full h-auto block select-none pointer-events-none"
               />
             </button>

@@ -299,11 +299,12 @@ export const SERIES_LIST = [
 ]
 
 export const SITE_BANNERS_DEFAULT = {
+  headerImage: '/images/ACCUEIL-OURS 3.jpg',
   surMesureTitle: 'LE SUR-MESURE',
   surMesureBanner: '/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg',
   ourseBruneTitle: 'OURSE BRUNE ?',
   contactTitle: 'CONTACT / COMMANDE',
-  newsletterTitle: 'ACTUALITÉS / NEWSLETTER',
+  newsletterTitle: 'NEWSLETTER / ACTUALITÉS',
 }
 
 export const SUR_MESURE_TEXT = {
@@ -325,7 +326,7 @@ export const OURSE_BRUNE_STORY = {
 }
 
 export const CONTACT_POLICY = {
-  intro: "Pour toute question ou commande, merci d’utiliser le formulaire ici",
+  intro: "Pour toute question ou commande, merci d’utiliser le formulaire :",
   p1: "Les pièces notées « Disponible » seront envoyées dès réception du règlement.",
   p2: "Pour celles notées « En commande », le délai de livraison est d'un mois maximum à partir de la commande. C'est le temps nécessaire à la fabrication. Chaque pièce est réalisée à la main et demande des heures de travail, puis vient la cuisson, avec son lot de surprises et parfois la nécessité de refaire la pièce selon les caprices du feu.",
   p3: "Pour éliminer le risque de casse, je porte une attention particulière à la livraison et aux solutions de fixation des œuvres.",
@@ -335,12 +336,23 @@ export const CONTACT_POLICY = {
 export const DEFAULT_EVENTS = [
   {
     id: 'event-demo-atelier',
-    title: 'Exposition & Rencontre à l’Atelier',
+    title: 'Exposition et Rencontre à l’Atelier',
     date: 'Automne 2026',
     image: '/images/COCTEAU-MALEINE.JPG',
     description: "test de texte descriptif et un lien bateau pour valider les redirections vers d'autres pages.",
     link: 'https://example.com',
     linkText: 'Découvrir l’événement',
+    order: 1,
+  },
+]
+
+export const DEFAULT_SUR_MESURE_PROJECTS = [
+  {
+    id: 'projet-fresque-restaurant',
+    title: 'Fresque Murale Grand Format',
+    date: 'Projet 2025',
+    image: '/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg',
+    description: "Création céramique sur-mesure conçue en étroite collaboration avec les architectes du projet. Jeu de reliefs, d’émaux mats et brillants, et résistance totale aux éléments intérieurs ou extérieurs.",
     order: 1,
   },
 ]

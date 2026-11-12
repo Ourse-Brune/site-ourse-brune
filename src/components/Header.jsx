@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
 
-export default function Header({ onNavigate }) {
+export default function Header({
+  onNavigate,
+  headerImage = '/images/ACCUEIL-OURS 3.jpg',
+  language = 'fr',
+  onLanguageChange,
+}) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -41,41 +46,17 @@ export default function Header({ onNavigate }) {
       {/* 
         HEADER BANNER FULL-WIDTH (STICKY SOUS-JACENT)
         - Couvre 100% de la hauteur de l'écran (100dvh) sur mobile comme sur desktop pour un rendu héroïque pleine page
-        - ACCUEIL-OURS 2.jpg (portrait 1456x1920) permet d'afficher l'ours avec toute sa hauteur sur smartphone
+        - ACCUEIL-OURS 3.jpg intègre directement le logo Ourse Brune Art Céramique
       */}
       <header className="sticky top-0 z-0 w-full h-[100dvh] min-h-[100dvh] overflow-hidden bg-stone-900 select-none">
         <div className="relative w-full h-full flex items-center justify-center">
           <img
-            src="/images/ACCUEIL-OURS 2.jpg"
-            alt="Ourse Brune — Plat en céramique emblématique Ours"
+            src={headerImage || '/images/ACCUEIL-OURS 3.jpg'}
+            alt="Ourse Brune — Art Céramique — Plat en céramique emblématique Ours"
             className="w-full h-full object-cover object-top"
             loading="eager"
             fetchPriority="high"
           />
-
-          {/* 
-            LOGO « Ourse brune — ART CÉRAMIQUE »
-            Centré dans l'espace en céramique blanche entre le haut du crâne de l'ours et la bordure rouge supérieure :
-            - 12.5% de hauteur sur smartphone / vue portrait
-            - 25% de hauteur sur écran d'ordinateur / vue paysage (landscape)
-          */}
-          <div className="absolute top-[12.5%] landscape:top-[25%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[52%] sm:portrait:w-[44%] landscape:w-[36%] max-w-[440px] pointer-events-auto">
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault()
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-              }}
-              className="block cursor-pointer transition-transform duration-300 hover:scale-101"
-              aria-label="Accueil Ourse Brune"
-            >
-              <img
-                src="/images/LOGO-OB-Art-ceramique-noir.png"
-                alt="Ourse Brune — Art Céramique"
-                className="w-full h-auto object-contain drop-shadow-[0_1px_2px_rgba(255,255,255,0.7)]"
-              />
-            </a>
-          </div>
 
           {/* FLÈCHE QUI SAUTILLE EN BAS DU HEADER SUR MOBILE (Indicateur invitant au défilement) */}
           <button
@@ -85,8 +66,8 @@ export default function Header({ onNavigate }) {
               if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
             }}
             className="absolute bottom-10 sm:bottom-12 left-1/2 -translate-x-1/2 z-20 p-2 text-white/90 hover:text-white transition-opacity animate-bounce cursor-pointer portrait:flex landscape:hidden md:hidden flex-col items-center select-none"
-            title="Défiler vers le bas"
-            aria-label="Défiler vers le bas"
+            title={language === 'en' ? 'Scroll down' : 'Défiler vers le bas'}
+            aria-label={language === 'en' ? 'Scroll down' : 'Défiler vers le bas'}
           >
             <svg
               className="w-10 h-10 sm:w-12 sm:h-12 drop-shadow-[0_3px_8px_rgba(0,0,0,0.9)]"
@@ -105,12 +86,49 @@ export default function Header({ onNavigate }) {
         - À l'état initial (haut de page) : sans fond rouge, deux barres blanches posées directement sur le coin rouge de l'ours
         - Au défilement (scrolled) : prend un léger fond bordeaux pour rester bien lisible sur le contenu blanc
       */}
-      <div className="fixed top-3 right-3 sm:top-5 sm:right-6 md:top-6 md:right-8 z-50">
+      <div className="fixed top-3 right-3 sm:top-5 sm:right-6 md:top-6 md:right-8 z-50 flex items-center gap-2.5 sm:gap-3.5">
+        {/* SÉLECTEUR DE LANGUE FR / EN (AFFICHÉ À GAUCHE DE LA CROIX QUAND LE MENU EST OUVERT) */}
+        {menuOpen && (
+          <div className="flex items-center gap-1.5 text-xs sm:text-sm font-sans tracking-widest uppercase select-none bg-black/80 px-3 py-1.5 rounded-full border border-white/20 backdrop-blur-md shadow-lg transition-all">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onLanguageChange && onLanguageChange('fr')
+              }}
+              className={`transition-colors duration-200 cursor-pointer px-1 py-0.5 rounded ${
+                language === 'fr'
+                  ? 'text-white font-extrabold underline underline-offset-4 decoration-2 decoration-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]'
+                  : 'text-white/40 hover:text-white/80'
+              }`}
+              aria-label="Passer en Français"
+            >
+              FR
+            </button>
+            <span className="text-white/30 text-xs">/</span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onLanguageChange && onLanguageChange('en')
+              }}
+              className={`transition-colors duration-200 cursor-pointer px-1 py-0.5 rounded ${
+                language === 'en'
+                  ? 'text-white font-extrabold underline underline-offset-4 decoration-2 decoration-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]'
+                  : 'text-white/40 hover:text-white/80'
+              }`}
+              aria-label="Switch to English"
+            >
+              EN
+            </button>
+          </div>
+        )}
+
         <button
           id="main-menu-btn"
           type="button"
           onClick={() => setMenuOpen(!menuOpen)}
-          aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+          aria-label={menuOpen ? (language === 'en' ? 'Close menu' : 'Fermer le menu') : (language === 'en' ? 'Open menu' : 'Ouvrir le menu')}
           aria-expanded={menuOpen}
           className={`group flex flex-col justify-center items-end p-2 sm:p-2.5 transition-all duration-300 cursor-pointer focus:outline-hidden ${
             scrolled
@@ -138,7 +156,7 @@ export default function Header({ onNavigate }) {
       </div>
 
       {/* 
-        TIROIR / OVERLAY DU MENU NAVIGATION — DIRECTION ARTISTIQUE NOIR & BLANC
+        TIROIR / OVERLAY DU MENU NAVIGATION — DIRECTION ARTISTIQUE NOIR ET BLANC
       */}
       <div
         className={`fixed inset-0 z-40 transition-all duration-500 ease-in-out ${
@@ -162,7 +180,7 @@ export default function Header({ onNavigate }) {
                 className="group text-left text-xl sm:text-2xl md:text-3xl font-extrabold tracking-wider uppercase text-white hover:text-white/60 transition-all duration-300 cursor-pointer flex items-center justify-between py-3 border-b border-white/10 hover:border-white/40"
               >
                 <span className="transform transition-transform duration-300 group-hover:translate-x-2">
-                  Ourse Brune ?
+                  {language === 'en' ? 'Ourse Brune?' : 'Ourse Brune ?'}
                 </span>
                 <span className="text-sm text-white/30 group-hover:text-white transition-colors">&rarr;</span>
               </button>
@@ -173,7 +191,7 @@ export default function Header({ onNavigate }) {
                 className="group text-left text-xl sm:text-2xl md:text-3xl font-extrabold tracking-wider uppercase text-white hover:text-white/60 transition-all duration-300 cursor-pointer flex items-center justify-between py-3 border-b border-white/10 hover:border-white/40"
               >
                 <span className="transform transition-transform duration-300 group-hover:translate-x-2">
-                  Contact / Commande
+                  {language === 'en' ? 'Contact / Order' : 'Contact / Commande'}
                 </span>
                 <span className="text-sm text-white/30 group-hover:text-white transition-colors">&rarr;</span>
               </button>
@@ -184,7 +202,7 @@ export default function Header({ onNavigate }) {
                 className="group text-left text-xl sm:text-2xl md:text-3xl font-extrabold tracking-wider uppercase text-white hover:text-white/60 transition-all duration-300 cursor-pointer flex items-center justify-between py-3 border-b border-white/10 hover:border-white/40"
               >
                 <span className="transform transition-transform duration-300 group-hover:translate-x-2">
-                  Actualités / Newsletter
+                  {language === 'en' ? 'Newsletter / News' : 'Newsletter / Actualités'}
                 </span>
                 <span className="text-sm text-white/30 group-hover:text-white transition-colors">&rarr;</span>
               </button>

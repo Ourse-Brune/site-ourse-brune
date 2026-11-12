@@ -7,8 +7,9 @@ import ContactSection from './components/ContactSection'
 import NewsletterSection from './components/NewsletterSection'
 import DishModal from './components/DishModal'
 import Footer from './components/Footer'
-import { SERIES_LIST, SITE_BANNERS_DEFAULT, DEFAULT_EVENTS } from './data/siteData'
+import { SERIES_LIST, SITE_BANNERS_DEFAULT, DEFAULT_EVENTS, DEFAULT_SUR_MESURE_PROJECTS } from './data/siteData'
 import { sanityClient, urlFor } from './lib/sanity'
+import { formatTypography } from './utils/typography'
 
 function formatSanityDish(p) {
   let statusColor = 'orange'
@@ -29,11 +30,17 @@ function formatSanityDish(p) {
 
   return {
     id: p._id,
-    name: p.title,
-    type: p.dimensions || '',
-    material: p.material || '',
-    edition: p.exemplaires || '',
-    status: statusText,
+    name: formatTypography(p.title),
+    titleEn: p.titleEn ? formatTypography(p.titleEn, 'en') : '',
+    type: formatTypography(p.dimensions || ''),
+    dimensionsEn: p.dimensionsEn ? formatTypography(p.dimensionsEn, 'en') : '',
+    material: formatTypography(p.material || ''),
+    materialEn: p.materialEn ? formatTypography(p.materialEn, 'en') : '',
+    edition: formatTypography(p.exemplaires || ''),
+    exemplairesEn: p.exemplairesEn ? formatTypography(p.exemplairesEn, 'en') : '',
+    description: formatTypography(p.description || ''),
+    descriptionEn: p.descriptionEn ? formatTypography(p.descriptionEn, 'en') : '',
+    status: formatTypography(statusText),
     statusColor,
     image: mainImageUrl,
     fullImage: fullImageUrl,
@@ -44,14 +51,35 @@ function formatSanityDish(p) {
 }
 
 function App() {
+  const [language, setLanguage] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('site_lang') || 'fr'
+    }
+    return 'fr'
+  })
+
+  const handleLanguageChange = (lang) => {
+    setLanguage(lang)
+    try {
+      localStorage.setItem('site_lang', lang)
+    } catch (_) {}
+  }
+
   const [seriesList, setSeriesList] = useState(SERIES_LIST)
   const [siteBanners, setSiteBanners] = useState(SITE_BANNERS_DEFAULT)
   const [events, setEvents] = useState(DEFAULT_EVENTS)
+  const [surMesureProjects, setSurMesureProjects] = useState(DEFAULT_SUR_MESURE_PROJECTS)
   const [ourseBruneText, setOurseBruneText] = useState('')
+  const [ourseBruneTextEn, setOurseBruneTextEn] = useState('')
   const [contactText, setContactText] = useState('')
+  const [contactTextEn, setContactTextEn] = useState('')
   const [actualiteText, setActualiteText] = useState('')
+  const [actualiteTextEn, setActualiteTextEn] = useState('')
   const [selectedDish, setSelectedDish] = useState(null)
-  const [contactSubject, setContactSubject] = useState("Commande d'une pièce")
+  const [contactSubject, setContactSubject] = useState('')
+  const [isOurseBruneOpen, setIsOurseBruneOpen] = useState(false)
+  const [isContactOpen, setIsContactOpen] = useState(false)
+  const [isNewsletterOpen, setIsNewsletterOpen] = useState(false)
   const [activeCenterId, setActiveCenterId] = useState(null)
 
   // Détecte le bandeau situé au milieu de l'écran sur mobile/tactile
@@ -102,6 +130,7 @@ function App() {
           sanityOurseBrune,
           sanityContact,
           sanityActualite,
+          sanitySurMesure,
         ] = await Promise.all([
           sanityClient.fetch(`*[_type == "serie" && !(_id in path("drafts.**"))] | order(order asc, _createdAt asc)`),
           sanityClient.fetch(
@@ -116,44 +145,88 @@ function App() {
           sanityClient.fetch(`*[_type == "texteOurseBrune"][0]`),
           sanityClient.fetch(`*[_type == "texteContact"][0]`),
           sanityClient.fetch(`*[_type == "texteActualite"][0]`),
+          sanityClient.fetch(`*[_type == "projetSurMesure" && !(_id in path("drafts.**"))] | order(order asc, _createdAt desc)`),
         ])
 
         if (sanityOurseBrune?.storyText) {
-          setOurseBruneText(sanityOurseBrune.storyText)
+          setOurseBruneText(formatTypography(sanityOurseBrune.storyText))
+        }
+        if (sanityOurseBrune?.storyTextEn) {
+          setOurseBruneTextEn(formatTypography(sanityOurseBrune.storyTextEn, 'en'))
         }
 
         if (sanityContact?.text) {
-          setContactText(sanityContact.text)
+          setContactText(formatTypography(sanityContact.text))
+        }
+        if (sanityContact?.textEn) {
+          setContactTextEn(formatTypography(sanityContact.textEn, 'en'))
         }
 
         if (sanityActualite?.text) {
-          setActualiteText(sanityActualite.text)
+          setActualiteText(formatTypography(sanityActualite.text))
+        }
+        if (sanityActualite?.textEn) {
+          setActualiteTextEn(formatTypography(sanityActualite.textEn, 'en'))
         }
 
         if (sanityEvents && sanityEvents.length > 0) {
           const formatted = sanityEvents.map((ev) => ({
             id: ev._id,
-            title: ev.title,
-            date: ev.date || '',
+            title: formatTypography(ev.title),
+            titleEn: ev.titleEn ? formatTypography(ev.titleEn, 'en') : '',
+            date: formatTypography(ev.date || ''),
+            dateEn: ev.dateEn ? formatTypography(ev.dateEn, 'en') : '',
             image: ev.image ? urlFor(ev.image).width(900).url() : '/images/COCTEAU-MALEINE.JPG',
-            description: ev.description || '',
+            description: formatTypography(ev.description || ''),
+            descriptionEn: ev.descriptionEn ? formatTypography(ev.descriptionEn, 'en') : '',
             link: ev.link || '',
-            linkText: ev.linkText || 'En savoir plus',
+            linkText: formatTypography(ev.linkText || 'En savoir plus'),
+            linkTextEn: ev.linkTextEn ? formatTypography(ev.linkTextEn, 'en') : '',
             order: ev.order ?? 1,
           }))
           setEvents(formatted)
         }
 
+        if (sanitySurMesure && sanitySurMesure.length > 0) {
+          const formattedSurMesure = sanitySurMesure.map((proj) => ({
+            id: proj._id,
+            title: formatTypography(proj.title),
+            titleEn: proj.titleEn ? formatTypography(proj.titleEn, 'en') : '',
+            date: formatTypography(proj.date || ''),
+            dateEn: proj.dateEn ? formatTypography(proj.dateEn, 'en') : '',
+            image: proj.image ? urlFor(proj.image).width(900).url() : '/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg',
+            description: formatTypography(proj.description || ''),
+            descriptionEn: proj.descriptionEn ? formatTypography(proj.descriptionEn, 'en') : '',
+            order: proj.order ?? 1,
+          }))
+          setSurMesureProjects(formattedSurMesure)
+        }
+
         if (sanityBanners) {
           setSiteBanners((prev) => ({
             ...prev,
-            surMesureTitle: sanityBanners.surMesureTitle || prev.surMesureTitle,
+            headerImage: sanityBanners.headerImage
+              ? urlFor(sanityBanners.headerImage).width(2000).url()
+              : prev.headerImage,
+            surMesureTitle: formatTypography(sanityBanners.surMesureTitle || prev.surMesureTitle),
+            surMesureTitleEn: sanityBanners.surMesureTitleEn
+              ? formatTypography(sanityBanners.surMesureTitleEn, 'en')
+              : prev.surMesureTitleEn,
             surMesureBanner: sanityBanners.surMesureBanner
               ? urlFor(sanityBanners.surMesureBanner).width(1600).url()
               : prev.surMesureBanner,
-            ourseBruneTitle: sanityBanners.ourseBruneTitle || prev.ourseBruneTitle,
-            contactTitle: sanityBanners.contactTitle || prev.contactTitle,
-            newsletterTitle: sanityBanners.newsletterTitle || prev.newsletterTitle,
+            ourseBruneTitle: formatTypography(sanityBanners.ourseBruneTitle || prev.ourseBruneTitle),
+            ourseBruneTitleEn: sanityBanners.ourseBruneTitleEn
+              ? formatTypography(sanityBanners.ourseBruneTitleEn, 'en')
+              : prev.ourseBruneTitleEn,
+            contactTitle: formatTypography(sanityBanners.contactTitle || prev.contactTitle),
+            contactTitleEn: sanityBanners.contactTitleEn
+              ? formatTypography(sanityBanners.contactTitleEn, 'en')
+              : prev.contactTitleEn,
+            newsletterTitle: formatTypography(sanityBanners.newsletterTitle || prev.newsletterTitle),
+            newsletterTitleEn: sanityBanners.newsletterTitleEn
+              ? formatTypography(sanityBanners.newsletterTitleEn, 'en')
+              : prev.newsletterTitleEn,
           }))
         }
 
@@ -170,12 +243,16 @@ function App() {
 
             return {
               id: serieSlug,
-              title: s.title,
-              bannerText: s.bannerText || s.title,
-              bannerSubtitle: s.bannerSubtitle || '',
+              title: formatTypography(s.title),
+              titleEn: s.titleEn ? formatTypography(s.titleEn, 'en') : '',
+              bannerText: formatTypography(s.bannerText || s.title),
+              bannerTextEn: s.bannerTextEn ? formatTypography(s.bannerTextEn, 'en') : '',
+              bannerSubtitle: formatTypography(s.bannerSubtitle || ''),
+              bannerSubtitleEn: s.bannerSubtitleEn ? formatTypography(s.bannerSubtitleEn, 'en') : '',
               bannerImg: bannerUrl,
               order: s.order ?? 99,
-              description: s.description || '',
+              description: formatTypography(s.description || ''),
+              descriptionEn: s.descriptionEn ? formatTypography(s.descriptionEn, 'en') : '',
               items: matchedPieces.length > 0 ? matchedPieces : (SERIES_LIST.find((loc) => loc.id === serieSlug)?.items || []),
               isReady: true,
             }
@@ -209,32 +286,57 @@ function App() {
 
   const handleOrderPiece = (pieceName) => {
     setSelectedDish(null)
-    setContactSubject(pieceName ? `Commande : ${pieceName}` : "Commande d'une pièce")
-    const el = document.getElementById('contact')
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    const orderPrefix = language === 'en' ? 'Order' : 'Commande'
+    const defaultSubject = language === 'en' ? "Ordering a piece" : "Commande d'une pièce"
+    setContactSubject(pieceName ? `${orderPrefix} : ${pieceName}` : defaultSubject)
+    setIsContactOpen(true)
+    setTimeout(() => {
+      const el = document.getElementById('contact')
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 60)
   }
 
   const handleContactClick = (subject) => {
-    setContactSubject(subject || "Projet sur-mesure")
-    const el = document.getElementById('contact')
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    const defaultCustom = language === 'en' ? "Bespoke project" : "Projet sur-mesure"
+    setContactSubject(subject || defaultCustom)
+    setIsContactOpen(true)
+    setTimeout(() => {
+      const el = document.getElementById('contact')
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 60)
   }
 
   const handleNavigate = (id) => {
-    const el = document.getElementById(id)
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (id === 'ourse-brune') {
+      setIsOurseBruneOpen(true)
+    } else if (id === 'contact') {
+      setIsContactOpen(true)
+    } else if (id === 'actualites' || id === 'newsletter') {
+      setIsNewsletterOpen(true)
     }
+
+    setTimeout(() => {
+      const targetId = id === 'newsletter' ? 'actualites' : id
+      const el = document.getElementById(targetId)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 60)
   }
 
   return (
     <div className="min-h-screen bg-stone-100 text-stone-900 flex flex-col items-center">
       {/* HEADER HERO (Ours pleine largeur avec logo et menu hamburger 2 barres) */}
-      <Header onNavigate={handleNavigate} />
+      <Header
+        onNavigate={handleNavigate}
+        headerImage={siteBanners.headerImage}
+        language={language}
+        onLanguageChange={handleLanguageChange}
+      />
 
       {/* MAIN CONTAINER (RIDEAU QUI REMONTE SUR L'OURS FIXE) */}
       <main className="relative z-10 w-full flex flex-col items-center bg-white shadow-[0_-12px_30px_rgba(0,0,0,0.25)]">
@@ -243,40 +345,55 @@ function App() {
           seriesList={seriesList}
           onSelectDish={setSelectedDish}
           activeCenterId={activeCenterId}
+          language={language}
         />
 
         {/* LE SUR-MESURE */}
         <SurMesureSection
-          bannerTitle={siteBanners.surMesureTitle}
+          bannerTitle={language === 'en' && siteBanners.surMesureTitleEn ? siteBanners.surMesureTitleEn : siteBanners.surMesureTitle}
           bannerImage={siteBanners.surMesureBanner}
+          projects={surMesureProjects}
           onContactClick={handleContactClick}
           isCenter={activeCenterId === 'sur-mesure'}
+          language={language}
         />
 
         {/* OURSE BRUNE ? (Bandeau Bordeaux) */}
         <OurseBruneSection
-          bannerTitle={siteBanners.ourseBruneTitle}
+          bannerTitle={language === 'en' && siteBanners.ourseBruneTitleEn ? siteBanners.ourseBruneTitleEn : siteBanners.ourseBruneTitle}
           storyText={ourseBruneText}
+          storyTextEn={ourseBruneTextEn}
+          isOpen={isOurseBruneOpen}
+          onToggle={setIsOurseBruneOpen}
+          language={language}
         />
 
         {/* CONTACT / COMMANDE (Bandeau Jaune) */}
         <ContactSection
           initialSubject={contactSubject}
-          bannerTitle={siteBanners.contactTitle}
+          bannerTitle={language === 'en' && siteBanners.contactTitleEn ? siteBanners.contactTitleEn : siteBanners.contactTitle}
           contactText={contactText}
+          contactTextEn={contactTextEn}
+          isOpen={isContactOpen}
+          onToggle={setIsContactOpen}
+          language={language}
         />
 
-        {/* ACTUALITÉS / NEWSLETTER (Bandeau Noir) */}
+        {/* NEWSLETTER / ACTUALITÉS (Bandeau Noir) */}
         <NewsletterSection
-          bannerTitle={siteBanners.newsletterTitle}
+          bannerTitle={language === 'en' && siteBanners.newsletterTitleEn ? siteBanners.newsletterTitleEn : siteBanners.newsletterTitle}
           events={events}
           actualiteText={actualiteText}
+          actualiteTextEn={actualiteTextEn}
+          isOpen={isNewsletterOpen}
+          onToggle={setIsNewsletterOpen}
+          language={language}
         />
       </main>
 
       {/* FOOTER */}
       <div className="relative z-10 w-full bg-black">
-        <Footer />
+        <Footer language={language} />
       </div>
 
       {/* LIGHTBOX MODAL SANS FLÈCHES, AVEC POINTS ET NAVIGATION SWIPE / DRAG */}
@@ -286,6 +403,7 @@ function App() {
           dish={selectedDish}
           onClose={() => setSelectedDish(null)}
           onOrder={handleOrderPiece}
+          language={language}
         />
       )}
     </div>

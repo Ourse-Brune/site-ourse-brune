@@ -1,9 +1,13 @@
 import { useEffect, useState, useRef } from 'react'
+import { formatTypography } from '../utils/typography'
+import { TRANSLATIONS, translatePiece } from '../data/translations'
 
-export default function DishModal({ dish, onClose }) {
+export default function DishModal({ dish: rawDish, onClose, language = 'fr' }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [dragOffset, setDragOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
+  const t = TRANSLATIONS[language] || TRANSLATIONS.fr
+  const dish = translatePiece(rawDish, language)
 
   const touchStartXRef = useRef(0)
   const touchCurrentXRef = useRef(0)
@@ -120,7 +124,7 @@ export default function DishModal({ dish, onClose }) {
       {/* En-tête discret avec nom de la pièce */}
       <div className="absolute top-5 sm:top-6 left-6 sm:left-10 z-20 flex flex-col pointer-events-none">
         <span className="text-sm sm:text-base font-bold tracking-widest text-white uppercase font-sans drop-shadow-md">
-          {dish.name}
+          {formatTypography(dish.name)}
         </span>
       </div>
 
@@ -129,7 +133,7 @@ export default function DishModal({ dish, onClose }) {
         type="button"
         onClick={onClose}
         className="absolute top-4 right-4 sm:top-6 sm:right-8 z-30 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-xs"
-        aria-label="Fermer le carrousel"
+        aria-label={t.dishModal.close}
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -145,7 +149,7 @@ export default function DishModal({ dish, onClose }) {
             setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
           }}
           className="absolute left-3 sm:left-6 md:left-8 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/40 hover:bg-black/75 text-white flex items-center justify-center transition-all cursor-pointer border border-white/20 hover:scale-110 active:scale-95 shadow-xl backdrop-blur-xs"
-          aria-label="Photo précédente"
+          aria-label={t.dishModal.prevPhoto}
         >
           <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
@@ -161,7 +165,7 @@ export default function DishModal({ dish, onClose }) {
             setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
           }}
           className="absolute right-3 sm:right-6 md:right-8 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/40 hover:bg-black/75 text-white flex items-center justify-center transition-all cursor-pointer border border-white/20 hover:scale-110 active:scale-95 shadow-xl backdrop-blur-xs"
-          aria-label="Photo suivante"
+          aria-label={t.dishModal.nextPhoto}
         >
           <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
@@ -170,7 +174,7 @@ export default function DishModal({ dish, onClose }) {
       )}
 
       {/* 
-        ZONE D'AFFICHAGE ET DE GLISSEMENT (TOUCH & SOURIS)
+        ZONE D'AFFICHAGE ET DE GLISSEMENT (TOUCH ET SOURIS)
         Navigation fluide par swipe / drag et flèches
       */}
       <div
@@ -222,7 +226,7 @@ export default function DishModal({ dish, onClose }) {
                 setDragOffset(0)
               }}
               className={`p-1.5 cursor-pointer focus:outline-hidden transition-all group`}
-              aria-label={`Aller à la photo ${idx + 1}`}
+              aria-label={`${t.dishModal.goToPhoto} ${idx + 1}`}
             >
               <span
                 className={`block rounded-full transition-all duration-300 ${

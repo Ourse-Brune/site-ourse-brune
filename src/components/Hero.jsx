@@ -1,7 +1,7 @@
 export default function Hero({ onExploreClick }) {
   return (
     <section className="relative w-full pt-20 sm:pt-24 bg-stone-100 flex flex-col items-center justify-center overflow-hidden">
-      {/* Container matching mobile & desktop proportion */}
+      {/* Container matching mobile et desktop proportion */}
       <div className="w-full max-w-2xl mx-auto flex flex-col items-center">
         <div className="relative w-full aspect-3/4 max-h-[85vh] sm:max-h-[90vh] overflow-hidden shadow-sm flex items-center justify-center">
           <img
