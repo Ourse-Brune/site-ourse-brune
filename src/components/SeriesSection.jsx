@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { formatTypography } from '../utils/typography'
-import { TRANSLATIONS, translatePiece } from '../data/translations'
+import { TRANSLATIONS, translatePiece, PIECE_TRANSLATIONS } from '../data/translations'
 
 export default function SeriesSection({ seriesList, onSelectDish, activeCenterId, language = 'fr' }) {
   // Par défaut, tous les bandeaux de séries sont repliés

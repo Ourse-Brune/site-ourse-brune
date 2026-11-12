@@ -83,15 +83,15 @@ export default function SurMesureSection({
                     const isDefault = proj.id === 'projet-fresque-restaurant'
                     const projectTitle =
                       language === 'en'
-                        ? proj.titleEn || (isDefault ? t.surMesure.defaultProject.title : proj.title)
+                        ? proj.titleEn || (isDefault ? t.surMesure?.defaultProject?.title : proj.title)
                         : proj.title
                     const projectDate =
                       language === 'en'
-                        ? proj.dateEn || (isDefault ? t.surMesure.defaultProject.date : proj.date)
+                        ? proj.dateEn || (isDefault ? t.surMesure?.defaultProject?.date : proj.date)
                         : proj.date
                     const projectDesc =
                       language === 'en'
-                        ? proj.descriptionEn || (isDefault ? t.surMesure.defaultProject.description : proj.description)
+                        ? proj.descriptionEn || (isDefault ? t.surMesure?.defaultProject?.description : proj.description)
                         : proj.description
 
                     return (

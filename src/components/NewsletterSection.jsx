@@ -192,7 +192,7 @@ export default function NewsletterSection({
                         : evt.description
                     const eventLinkText =
                       language === 'en'
-                        ? evt.linkTextEn || t.newsletter.learnMore
+                        ? evt.linkTextEn || t.newsletter?.learnMore || 'Learn more'
                         : evt.linkText || 'En savoir plus'
 
                     return (
