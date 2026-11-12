@@ -314,7 +314,7 @@ export const SUR_MESURE_TEXT = {
 }
 
 export const OURSE_BRUNE_STORY = {
-  p1: "En 2019, avec ma famille, nous nous sommes enfin attelés à vider l'atelier de nos grands-parents, mais j'ai été prise d'une envie irrésistible de m'y installer !",
+  p1: "En 2019, avec ma famille, nous nous sommes enfin attelés à vider l'atelier de nos grands-parents, mais j'ai été prise d'une envie irrésistible de m'y installer &nbsp;!",
   p2: "J'ai ressorti tous les outils, les plats vierges, les nombreux émaux et autres sachets ou flacons de produits mystérieux. Et surtout, les merveilleux cahiers de ma grand-mère, Marie-Madeleine Jolly, trésors de recettes et méthodes qu'elle avait précieusement notées. Elle était une femme extraordinaire au talent inestimable. Elle a créé avec Jean Cocteau, à la fin des années 50, une collection d'œuvres céramiques magnifiques.",
   p3: "Me voilà donc parti dans l'aventure de l'atelier Ourse Brune, avec passion et émotion, même si la tâche a été difficile parfois ! La céramique demande une grande patience et le feu règne en maître. Mais quand la chimie opère, c'est magique.",
   p4: "J'ai vite compris pourquoi ma grand-mère passait tout son temps dans son atelier. Petite, je la regardais travailler sans dire un mot, pour ne pas la déconcentrer. J'étais fascinée. J'ignorais à cette époque qu'un jour, ces heures d'observation me guideraient dans mon travail. Ma reconnaissance pour cette transmission est immense.",
