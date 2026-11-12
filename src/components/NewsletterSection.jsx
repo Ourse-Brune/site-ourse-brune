@@ -15,6 +15,9 @@ export default function NewsletterSection({
   const isControlled = externalIsOpen !== undefined
   const isOpen = isControlled ? externalIsOpen : internalIsOpen
   const [email, setEmail] = useState('')
+  const [honeypot, setHoneypot] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const [subscribed, setSubscribed] = useState(false)
   const t = TRANSLATIONS[language] || TRANSLATIONS.fr
   const isDefaultTitle = !bannerTitle || bannerTitle.replace(/[\s\u00A0]+/g, ' ').trim().toUpperCase().includes('NEWSLETTER') || bannerTitle.replace(/[\s\u00A0]+/g, ' ').trim().toUpperCase().includes('ACTUALIT')
@@ -38,10 +41,39 @@ export default function NewsletterSection({
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault()
-    if (email) {
-      setSubscribed(true)
+    if (!email) return
+
+    setIsLoading(true)
+    setErrorMessage('')
+
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          _gotcha: honeypot,
+        }),
+      })
+
+      const data = await res.json().catch(() => ({}))
+
+      if (res.ok && data.success) {
+        setSubscribed(true)
+        setEmail('')
+        setErrorMessage('')
+      } else {
+        setErrorMessage(data.error || t.newsletter.errorText)
+      }
+    } catch (err) {
+      console.error('Erreur newsletter :', err)
+      setErrorMessage(t.newsletter.errorText)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -87,25 +119,51 @@ export default function NewsletterSection({
 
             {/* Champ de saisie simple sans logo */}
             <div className="w-full max-w-md px-4 mb-12 sm:mb-16">
+              {errorMessage && (
+                <div className="mb-3 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs sm:text-sm font-medium text-center">
+                  {errorMessage}
+                </div>
+              )}
+
               {subscribed ? (
                 <div className="p-4 rounded-xl bg-stone-100 border border-stone-300 text-stone-900 text-sm font-medium text-center">
                   {t.newsletter.subscribedSuccess}
                 </div>
               ) : (
                 <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3">
+                  {/* Honeypot anti-spam caché */}
+                  <input
+                    type="text"
+                    name="_gotcha"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    tabIndex="-1"
+                    autoComplete="off"
+                    className="hidden"
+                    aria-hidden="true"
+                  />
+
                   <input
                     type="email"
                     required
+                    disabled={isLoading}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t.newsletter.emailPlaceholder}
-                    className="flex-1 px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden text-sm bg-white text-black placeholder-stone-400"
+                    className="flex-1 px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden text-sm bg-white text-black placeholder-stone-400 disabled:opacity-60"
                   />
                   <button
                     type="submit"
-                    className="px-6 py-3 rounded-lg bg-black hover:bg-stone-800 text-white font-bold tracking-wider text-xs sm:text-sm uppercase transition-colors cursor-pointer shrink-0"
+                    disabled={isLoading}
+                    className="px-6 py-3 rounded-lg bg-black hover:bg-stone-800 text-white font-bold tracking-wider text-xs sm:text-sm uppercase transition-colors cursor-pointer shrink-0 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {t.newsletter.subscribeBtn}
+                    {isLoading && (
+                      <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    )}
+                    <span>{isLoading ? t.newsletter.submittingBtn : t.newsletter.subscribeBtn}</span>
                   </button>
                 </form>
               )}

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { CONTACT_POLICY } from '../data/siteData'
 import { formatTypography } from '../utils/typography'
 import { TRANSLATIONS } from '../data/translations'
 
@@ -26,6 +25,9 @@ export default function ContactSection({
     subject: initialSubject || t.contact.subjectPiece,
     message: '',
   })
+  const [honeypot, setHoneypot] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
@@ -58,9 +60,41 @@ export default function ContactSection({
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitted(true)
+    setIsLoading(true)
+    setErrorMessage('')
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          subject: formData.subject,
+          message: formData.message,
+          _gotcha: honeypot,
+        }),
+      })
+
+      const data = await res.json().catch(() => ({}))
+
+      if (res.ok && data.success) {
+        setSubmitted(true)
+        setErrorMessage('')
+      } else {
+        setErrorMessage(data.error || t.contact.errorText)
+      }
+    } catch (err) {
+      console.error('Erreur contact :', err)
+      setErrorMessage(t.contact.errorText)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const defaultParagraphs = [
@@ -138,6 +172,24 @@ export default function ContactSection({
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* Honeypot anti-spam caché */}
+                  <input
+                    type="text"
+                    name="_gotcha"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    tabIndex="-1"
+                    autoComplete="off"
+                    className="hidden"
+                    aria-hidden="true"
+                  />
+
+                  {errorMessage && (
+                    <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs sm:text-sm font-medium text-center">
+                      {errorMessage}
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-black mb-1.5">
@@ -146,10 +198,11 @@ export default function ContactSection({
                       <input
                         type="text"
                         required
+                        disabled={isLoading}
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder={t.contact.namePlaceholder}
-                        className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white"
+                        className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white disabled:opacity-60"
                       />
                     </div>
                     <div>
@@ -159,10 +212,11 @@ export default function ContactSection({
                       <input
                         type="email"
                         required
+                        disabled={isLoading}
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         placeholder={t.contact.emailPlaceholder}
-                        className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white"
+                        className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white disabled:opacity-60"
                       />
                     </div>
                   </div>
@@ -174,10 +228,11 @@ export default function ContactSection({
                       </label>
                       <input
                         type="tel"
+                        disabled={isLoading}
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         placeholder={t.contact.phonePlaceholder}
-                        className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white"
+                        className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white disabled:opacity-60"
                       />
                     </div>
                     <div>
@@ -185,9 +240,10 @@ export default function ContactSection({
                         {t.contact.subjectLabel}
                       </label>
                       <select
+                        disabled={isLoading}
                         value={formData.subject}
                         onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white"
+                        className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white disabled:opacity-60"
                       >
                         <option value={t.contact.subjectPiece}>{t.contact.subjectPiece}</option>
                         <option value={t.contact.subjectCustom}>{t.contact.subjectCustom}</option>
@@ -204,18 +260,26 @@ export default function ContactSection({
                     <textarea
                       required
                       rows={4}
+                      disabled={isLoading}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       placeholder={t.contact.messagePlaceholder}
-                      className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white"
+                      className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:border-black focus:ring-1 focus:ring-black outline-hidden transition-all text-sm bg-white disabled:opacity-60"
                     ></textarea>
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-3.5 rounded-lg bg-black hover:bg-stone-800 text-white font-bold tracking-wider uppercase text-sm shadow-md transition-all duration-200 cursor-pointer"
+                    disabled={isLoading}
+                    className="w-full py-3.5 rounded-lg bg-black hover:bg-stone-800 text-white font-bold tracking-wider uppercase text-sm shadow-md transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {t.contact.submitBtn}
+                    {isLoading && (
+                      <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    )}
+                    <span>{isLoading ? t.contact.submittingBtn : t.contact.submitBtn}</span>
                   </button>
                 </form>
               )}
