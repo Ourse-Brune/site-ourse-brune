@@ -137,7 +137,7 @@ function App() {
         ] = await Promise.all([
           sanityClient.fetch(`*[_type == "serie" && !(_id in path("drafts.**"))] | order(order asc, _createdAt asc)`),
           sanityClient.fetch(
-            `*[_type == "piece" && !(_id in path("drafts.**"))] | order(order asc, _createdAt desc) {
+            `*[_type == "piece" && !(_id in path("drafts.**")) && estVisible != false] | order(order asc, _createdAt desc) {
               ...,
               "serieSlug": coalesce(serie->slug.current, serie),
               "serieRef": serie._ref
@@ -296,7 +296,9 @@ function App() {
               order: s.order ?? 99,
               description: formatTypography(s.description || ''),
               descriptionEn: s.descriptionEn ? formatTypography(s.descriptionEn, 'en') : '',
-              items: matchedPieces.length > 0 ? matchedPieces : (SERIES_LIST.find((loc) => loc.id === serieSlug)?.items || []),
+              items: (sanityPieces && Array.isArray(sanityPieces))
+                ? matchedPieces
+                : (matchedPieces.length > 0 ? matchedPieces : (SERIES_LIST.find((loc) => loc.id === serieSlug)?.items || [])),
               isReady: true,
             }
           })
