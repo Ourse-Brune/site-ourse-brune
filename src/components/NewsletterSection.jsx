@@ -176,21 +176,17 @@ export default function NewsletterSection({
               <div className="w-full max-w-5xl px-4 sm:px-8 mb-12 sm:mb-16">
                 <div className="space-y-10 sm:space-y-12">
                   {events.map((evt) => {
-                    const isDefaultEvt = evt.id === 'event-demo-atelier'
                     const eventTitle =
                       language === 'en'
-                        ? evt.titleEn || (isDefaultEvt ? 'Exhibition and Open Studio' : evt.title)
+                        ? (evt.titleEn || evt.title)
                         : evt.title
                     const eventDate =
                       language === 'en'
-                        ? evt.dateEn || (isDefaultEvt ? 'Autumn 2026' : evt.date)
+                        ? (evt.dateEn || evt.date)
                         : evt.date
                     const eventDesc =
                       language === 'en'
-                        ? evt.descriptionEn ||
-                          (isDefaultEvt
-                            ? 'Exhibition and open studio days to discover new pieces and meet the artist.'
-                            : evt.description)
+                        ? (evt.descriptionEn || evt.description)
                         : evt.description
                     const eventLinkText =
                       language === 'en'

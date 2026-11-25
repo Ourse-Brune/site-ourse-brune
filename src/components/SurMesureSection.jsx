@@ -88,18 +88,17 @@ export default function SurMesureSection({
               <div className="w-full max-w-5xl px-4 sm:px-8 mb-12 sm:mb-16">
                 <div className="space-y-10 sm:space-y-12">
                   {projects.map((proj) => {
-                    const isDefault = proj.id === 'projet-fresque-restaurant'
                     const projectTitle =
                       language === 'en'
-                        ? proj.titleEn || (isDefault ? t.surMesure?.defaultProject?.title : proj.title)
+                        ? (proj.titleEn || proj.title)
                         : proj.title
                     const projectDate =
                       language === 'en'
-                        ? proj.dateEn || (isDefault ? t.surMesure?.defaultProject?.date : proj.date)
+                        ? (proj.dateEn || proj.date)
                         : proj.date
                     const projectDesc =
                       language === 'en'
-                        ? proj.descriptionEn || (isDefault ? t.surMesure?.defaultProject?.description : proj.description)
+                        ? (proj.descriptionEn || proj.description)
                         : proj.description
 
                     const projectImages = proj.images && proj.images.length > 0

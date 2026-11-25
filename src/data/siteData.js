@@ -337,28 +337,6 @@ export const CONTACT_POLICY = {
   p4: "Amis galeristes, si vous souhaitez exposer mes œuvres, n'hésitez pas à me contacter !",
 }
 
-export const DEFAULT_EVENTS = [
-  {
-    id: 'event-demo-atelier',
-    title: 'Exposition et Rencontre à l’Atelier',
-    date: 'Automne 2026',
-    image: '/images/COCTEAU-MALEINE.JPG',
-    images: ['/images/COCTEAU-MALEINE.JPG'],
-    description: "test de texte descriptif et un lien bateau pour valider les redirections vers d'autres pages.",
-    link: 'https://example.com',
-    linkText: 'Découvrir l’événement',
-    order: 1,
-  },
-]
+export const DEFAULT_EVENTS = []
 
-export const DEFAULT_SUR_MESURE_PROJECTS = [
-  {
-    id: 'projet-fresque-restaurant',
-    title: 'Fresque Murale Grand Format',
-    date: 'Projet 2025',
-    image: '/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg',
-    images: ['/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg'],
-    description: "Création céramique sur-mesure conçue en étroite collaboration avec les architectes du projet. Jeu de reliefs, d’émaux mats et brillants, et résistance totale aux éléments intérieurs ou extérieurs.",
-    order: 1,
-  },
-]
+export const DEFAULT_SUR_MESURE_PROJECTS = []

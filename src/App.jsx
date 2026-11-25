@@ -67,8 +67,8 @@ function App() {
 
   const [seriesList, setSeriesList] = useState(SERIES_LIST)
   const [siteBanners, setSiteBanners] = useState(SITE_BANNERS_DEFAULT)
-  const [events, setEvents] = useState(DEFAULT_EVENTS)
-  const [surMesureProjects, setSurMesureProjects] = useState(DEFAULT_SUR_MESURE_PROJECTS)
+  const [events, setEvents] = useState([])
+  const [surMesureProjects, setSurMesureProjects] = useState([])
   const [surMesureText, setSurMesureText] = useState('')
   const [surMesureTextEn, setSurMesureTextEn] = useState('')
   const [ourseBruneText, setOurseBruneText] = useState('')
@@ -180,7 +180,7 @@ function App() {
           setActualiteTextEn(formatTypography(sanityActualite.textEn, 'en'))
         }
 
-        if (sanityEvents && sanityEvents.length > 0) {
+        if (sanityEvents) {
           const formatted = sanityEvents.map((ev) => {
             const mainImageUrl = ev.image ? urlFor(ev.image).width(1200).url() : '/images/COCTEAU-MALEINE.JPG'
             const galleryUrls = ev.gallery && Array.isArray(ev.gallery)
@@ -208,7 +208,7 @@ function App() {
           setEvents(formatted)
         }
 
-        if (sanitySurMesure && sanitySurMesure.length > 0) {
+        if (sanitySurMesure) {
           const formattedSurMesure = sanitySurMesure.map((proj) => {
             const mainImageUrl = proj.image ? urlFor(proj.image).width(1200).url() : '/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg'
             const galleryUrls = proj.gallery && Array.isArray(proj.gallery)
