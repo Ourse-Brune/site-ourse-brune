@@ -1,12 +1,16 @@
 import { useState } from 'react'
 import { formatTypography } from '../utils/typography'
 import { TRANSLATIONS } from '../data/translations'
+import MediaGalleryGrid from './MediaGalleryGrid'
 
 export default function SurMesureSection({
   bannerTitle = 'LE SUR-MESURE',
   bannerImage = '/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg',
   projects = [],
+  surMesureText = '',
+  surMesureTextEn = '',
   onContactClick,
+  onMediaClick,
   isCenter = false,
   language = 'fr',
 }) {
@@ -23,7 +27,11 @@ export default function SurMesureSection({
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const paragraphs = [t.surMesure.p1, t.surMesure.p2, t.surMesure.p3, t.surMesure.p4]
+  const defaultParagraphs = [t.surMesure.p1, t.surMesure.p2, t.surMesure.p3, t.surMesure.p4]
+  const customText = language === 'en' && surMesureTextEn ? surMesureTextEn : surMesureText
+  const paragraphs = customText
+    ? (customText.includes('\n\n') ? customText.split(/\n\s*\n/) : customText.split(/\n+/)).map((p) => p.trim()).filter(Boolean)
+    : defaultParagraphs
 
   return (
     <section id="section-sur-mesure" className="w-full bg-white flex flex-col items-center scroll-mt-20">
@@ -94,25 +102,31 @@ export default function SurMesureSection({
                         ? proj.descriptionEn || (isDefault ? t.surMesure?.defaultProject?.description : proj.description)
                         : proj.description
 
+                    const projectImages = proj.images && proj.images.length > 0
+                      ? proj.images
+                      : (proj.image ? [proj.image] : ['/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg'])
+
                     return (
                       <div
                         key={proj.id}
-                        className="grid grid-cols-1 sm:grid-cols-12 gap-6 sm:gap-8 md:gap-10 items-start"
+                        className="grid grid-cols-1 sm:grid-cols-12 gap-8 md:gap-12 items-start"
                       >
-                        {/* Colonne Gauche : Visuel du projet sur-mesure */}
-                        <div className="sm:col-span-5 flex justify-center sm:justify-start">
-                          <div className="relative overflow-hidden rounded-xl border border-stone-200 shadow-md bg-stone-100 w-full max-w-[280px] sm:max-w-[340px] aspect-square flex items-center justify-center">
-                            <img
-                              src={proj.image || '/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg'}
-                              alt={projectTitle || 'Projet sur-mesure'}
-                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                              loading="lazy"
-                            />
-                          </div>
+                        {/* Colonne Gauche : Galerie visuelle (50% de la largeur) */}
+                        <div className="sm:col-span-6 flex flex-col justify-start w-full">
+                          <MediaGalleryGrid
+                            images={projectImages}
+                            title={projectTitle}
+                            onImageClick={(idx) => onMediaClick && onMediaClick({
+                              id: proj.id,
+                              title: projectTitle,
+                              titleEn: proj.titleEn,
+                              images: projectImages,
+                            }, idx)}
+                          />
                         </div>
 
-                        {/* Colonne Droite : Date en haut, Titre en dessous, Description encore en dessous (alignés en haut avec l'image) */}
-                        <div className="sm:col-span-7 flex flex-col justify-start text-left pt-0">
+                        {/* Colonne Droite : Date en haut, Titre en dessous, Description encore en dessous (50% de la largeur) */}
+                        <div className="sm:col-span-6 flex flex-col justify-start text-left pt-0">
                           {projectDate && (
                             <span className="inline-block px-3 py-1 mb-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-stone-100 text-stone-800 border border-stone-300 w-fit">
                               {formatTypography(projectDate, language)}

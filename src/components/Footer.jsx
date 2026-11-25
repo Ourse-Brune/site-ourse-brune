@@ -1,8 +1,11 @@
 import { formatTypography } from '../utils/typography'
 import { TRANSLATIONS } from '../data/translations'
 
-export default function Footer({ language = 'fr' }) {
+export default function Footer({ language = 'fr', credits = '', subtitle = '' }) {
   const t = TRANSLATIONS[language] || TRANSLATIONS.fr
+
+  const displayCredits = credits || t.footer.credits
+  const displaySubtitle = subtitle || t.footer.subtitle
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -31,10 +34,10 @@ export default function Footer({ language = 'fr' }) {
             {t.footer.title}
           </p>
           <p className="text-xs sm:text-sm text-stone-500">
-            {formatTypography(t.footer.subtitle, language)}
+            {formatTypography(displaySubtitle, language)}
           </p>
           <p className="text-xs sm:text-sm text-stone-500">
-            {formatTypography(t.footer.credits, language)}
+            {formatTypography(displayCredits, language)}
           </p>
           <p className="text-xs sm:text-sm text-stone-500">
             {formatTypography(`© ${new Date().getFullYear()} ${t.footer.copyright}`, language)}

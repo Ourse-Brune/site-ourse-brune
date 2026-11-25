@@ -305,6 +305,10 @@ export const SITE_BANNERS_DEFAULT = {
   ourseBruneTitle: 'OURSE BRUNE ?',
   contactTitle: 'CONTACT / COMMANDE',
   newsletterTitle: 'NEWSLETTER / ACTUALITÉS',
+  footerSubtitle: 'Atelier de création céramique contemporaine • Drôme',
+  footerSubtitleEn: 'Contemporary ceramic art atelier • Drôme, France',
+  footerCredits: 'Photos et vidéos : Zélie Eynard. Design graphique : Ourse Brune. Création du site : Maxence Bernard.',
+  footerCreditsEn: 'Photos and videos: Zélie Eynard. Graphic design: Ourse Brune. Website creation: Maxence Bernard.',
 }
 
 export const SUR_MESURE_TEXT = {
@@ -339,6 +343,7 @@ export const DEFAULT_EVENTS = [
     title: 'Exposition et Rencontre à l’Atelier',
     date: 'Automne 2026',
     image: '/images/COCTEAU-MALEINE.JPG',
+    images: ['/images/COCTEAU-MALEINE.JPG'],
     description: "test de texte descriptif et un lien bateau pour valider les redirections vers d'autres pages.",
     link: 'https://example.com',
     linkText: 'Découvrir l’événement',
@@ -352,6 +357,7 @@ export const DEFAULT_SUR_MESURE_PROJECTS = [
     title: 'Fresque Murale Grand Format',
     date: 'Projet 2025',
     image: '/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg',
+    images: ['/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg'],
     description: "Création céramique sur-mesure conçue en étroite collaboration avec les architectes du projet. Jeu de reliefs, d’émaux mats et brillants, et résistance totale aux éléments intérieurs ou extérieurs.",
     order: 1,
   },

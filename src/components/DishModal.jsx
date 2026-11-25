@@ -3,16 +3,46 @@ import { formatTypography } from '../utils/typography'
 import { TRANSLATIONS, translatePiece } from '../data/translations'
 
 export default function DishModal({ dish: rawDish, onClose, language = 'fr' }) {
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(rawDish?.initialIndex || 0)
   const [dragOffset, setDragOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
+  const [scale, setScale] = useState(1)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [isInteracting, setIsInteracting] = useState(false)
+
   const t = TRANSLATIONS[language] || TRANSLATIONS.fr
   const dish = translatePiece(rawDish, language)
+
+  const scaleRef = useRef(1)
+  const positionRef = useRef({ x: 0, y: 0 })
+
+  useEffect(() => {
+    if (rawDish?.initialIndex !== undefined) {
+      setCurrentIndex(rawDish.initialIndex)
+    }
+  }, [rawDish?.initialIndex])
+
+  useEffect(() => {
+    scaleRef.current = scale
+  }, [scale])
+
+  useEffect(() => {
+    positionRef.current = position
+  }, [position])
 
   const touchStartXRef = useRef(0)
   const touchCurrentXRef = useRef(0)
   const mouseStartXRef = useRef(0)
   const isMouseDownRef = useRef(false)
+
+  // Zoom / Pan refs
+  const touchStartPosRef = useRef({ x: 0, y: 0 })
+  const panStartRef = useRef({ x: 0, y: 0 })
+  const lastTapRef = useRef(0)
+  const pinchStartDistRef = useRef(0)
+  const pinchStartScaleRef = useRef(1)
+  const isPinchingRef = useRef(false)
+  const isPanningRef = useRef(false)
 
   // Rassembler toutes les photos de détail :
   // En priorité la photo principale (image / fullImage), puis les autres vues dans l'ordre (gallery).
@@ -23,14 +53,32 @@ export default function DishModal({ dish: rawDish, onClose, language = 'fr' }) {
 
   const images = detailImages.length > 0 ? detailImages : (dish?.image ? [dish.image] : [])
 
+  const resetZoom = () => {
+    setScale(1)
+    setPosition({ x: 0, y: 0 })
+    setDragOffset(0)
+    setIsDragging(false)
+    isPanningRef.current = false
+    isPinchingRef.current = false
+    setIsInteracting(false)
+  }
+
+  // Réinitialiser le zoom lors du changement d'image
+  useEffect(() => {
+    resetZoom()
+  }, [currentIndex])
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        onClose()
-      } else if (e.key === 'ArrowLeft' && images.length > 1) {
+        if (scaleRef.current > 1.05) {
+          resetZoom()
+        } else {
+          onClose()
+        }
+      } else if (e.key === 'ArrowLeft' && images.length > 1 && scaleRef.current <= 1.05) {
         setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
-      } else if (e.key === 'ArrowRight' && images.length > 1) {
+      } else if (e.key === 'ArrowRight' && images.length > 1 && scaleRef.current <= 1.05) {
         setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
       }
     }
@@ -45,72 +93,210 @@ export default function DishModal({ dish: rawDish, onClose, language = 'fr' }) {
 
   if (!dish || images.length === 0) return null
 
-  // GESTION DU GLISSEMENT TACTILE (DOIGT / SMARTPHONE / TABLETTE)
+  const getDistance = (t1, t2) => {
+    const dx = t1.clientX - t2.clientX
+    const dy = t1.clientY - t2.clientY
+    return Math.hypot(dx, dy)
+  }
+
+  // GESTION DU GLISSEMENT ET DU ZOOM TACTILE (SMARTPHONE / TABLETTE)
   const handleTouchStart = (e) => {
-    if (images.length <= 1) return
-    touchStartXRef.current = e.touches[0].clientX
-    touchCurrentXRef.current = e.touches[0].clientX
-    setIsDragging(true)
+    if (e.touches.length === 2) {
+      // PINCEMENT POUR ZOOMER (2 DOIGTS)
+      isPinchingRef.current = true
+      isPanningRef.current = false
+      setIsDragging(false)
+      setIsInteracting(true)
+      pinchStartDistRef.current = getDistance(e.touches[0], e.touches[1])
+      pinchStartScaleRef.current = scaleRef.current
+      return
+    }
+
+    if (e.touches.length === 1) {
+      const touch = e.touches[0]
+      const now = Date.now()
+
+      // DOUBLE-TAP : Bascule entre 1x et 2.5x
+      if (now - lastTapRef.current < 320) {
+        lastTapRef.current = 0
+        if (scaleRef.current > 1.05) {
+          resetZoom()
+        } else {
+          setScale(2.5)
+          setPosition({ x: 0, y: 0 })
+        }
+        return
+      }
+      lastTapRef.current = now
+
+      if (scaleRef.current > 1.05) {
+        // IMAGE ZOOMÉE : DÉPLACEMENT DE L'IMAGE (PAN)
+        isPanningRef.current = true
+        setIsInteracting(true)
+        touchStartPosRef.current = { x: touch.clientX, y: touch.clientY }
+        panStartRef.current = { ...positionRef.current }
+      } else if (images.length > 1) {
+        // IMAGE TAILLE NORMALE : DÉFILEMENT ENTRE PHOTOS
+        touchStartXRef.current = touch.clientX
+        touchCurrentXRef.current = touch.clientX
+        setIsDragging(true)
+        setIsInteracting(true)
+      }
+    }
   }
 
   const handleTouchMove = (e) => {
-    if (images.length <= 1 || !isDragging) return
-    touchCurrentXRef.current = e.touches[0].clientX
-    const diff = touchCurrentXRef.current - touchStartXRef.current
-    setDragOffset(diff)
+    if (e.touches.length === 2 && isPinchingRef.current) {
+      const currentDist = getDistance(e.touches[0], e.touches[1])
+      if (pinchStartDistRef.current > 0) {
+        const factor = currentDist / pinchStartDistRef.current
+        const newScale = Math.min(4, Math.max(1, pinchStartScaleRef.current * factor))
+        setScale(newScale)
+        if (newScale <= 1.05) {
+          setPosition({ x: 0, y: 0 })
+        }
+      }
+      return
+    }
+
+    if (e.touches.length === 1) {
+      const touch = e.touches[0]
+      if (isPanningRef.current && scaleRef.current > 1.05) {
+        const deltaX = touch.clientX - touchStartPosRef.current.x
+        const deltaY = touch.clientY - touchStartPosRef.current.y
+        const rawX = panStartRef.current.x + deltaX
+        const rawY = panStartRef.current.y + deltaY
+
+        const maxX = Math.max(0, (window.innerWidth * (scaleRef.current - 1)) / 1.8)
+        const maxY = Math.max(0, (window.innerHeight * (scaleRef.current - 1)) / 1.8)
+
+        setPosition({
+          x: Math.min(maxX, Math.max(-maxX, rawX)),
+          y: Math.min(maxY, Math.max(-maxY, rawY)),
+        })
+      } else if (isDragging && scaleRef.current <= 1.05 && images.length > 1) {
+        touchCurrentXRef.current = touch.clientX
+        const diff = touchCurrentXRef.current - touchStartXRef.current
+        setDragOffset(diff)
+      }
+    }
   }
 
-  const handleTouchEnd = () => {
-    if (images.length <= 1 || !isDragging) return
-    const diff = touchCurrentXRef.current - touchStartXRef.current
-    const threshold = 45 // distance minimale de glissement en pixels
-
-    if (diff < -threshold) {
-      // Glissement vers la gauche -> image suivante
-      setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
-    } else if (diff > threshold) {
-      // Glissement vers la droite -> image précédente
-      setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+  const handleTouchEnd = (e) => {
+    if (isPinchingRef.current) {
+      if (e.touches.length < 2) {
+        isPinchingRef.current = false
+        setIsInteracting(false)
+        if (scaleRef.current < 1.1) {
+          resetZoom()
+        }
+      }
+      return
     }
-    setDragOffset(0)
-    setIsDragging(false)
+
+    if (isPanningRef.current) {
+      isPanningRef.current = false
+      setIsInteracting(false)
+      return
+    }
+
+    if (isDragging) {
+      const diff = touchCurrentXRef.current - touchStartXRef.current
+      const threshold = 45
+
+      if (diff < -threshold) {
+        setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+      } else if (diff > threshold) {
+        setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+      }
+      setDragOffset(0)
+      setIsDragging(false)
+      setIsInteracting(false)
+    }
   }
 
   // GESTION DU GLISSEMENT À LA SOURIS (DESKTOP)
   const handleMouseDown = (e) => {
-    if (images.length <= 1) return
-    isMouseDownRef.current = true
-    mouseStartXRef.current = e.clientX
-    setIsDragging(true)
+    if (e.button !== 0) return
+
+    if (scaleRef.current > 1.05) {
+      isPanningRef.current = true
+      setIsInteracting(true)
+      touchStartPosRef.current = { x: e.clientX, y: e.clientY }
+      panStartRef.current = { ...positionRef.current }
+    } else if (images.length > 1) {
+      isMouseDownRef.current = true
+      mouseStartXRef.current = e.clientX
+      setIsDragging(true)
+      setIsInteracting(true)
+    }
   }
 
   const handleMouseMove = (e) => {
-    if (!isMouseDownRef.current || images.length <= 1) return
-    const diff = e.clientX - mouseStartXRef.current
-    setDragOffset(diff)
+    if (isPanningRef.current && scaleRef.current > 1.05) {
+      const deltaX = e.clientX - touchStartPosRef.current.x
+      const deltaY = e.clientY - touchStartPosRef.current.y
+      const rawX = panStartRef.current.x + deltaX
+      const rawY = panStartRef.current.y + deltaY
+
+      const maxX = Math.max(0, (window.innerWidth * (scaleRef.current - 1)) / 1.8)
+      const maxY = Math.max(0, (window.innerHeight * (scaleRef.current - 1)) / 1.8)
+
+      setPosition({
+        x: Math.min(maxX, Math.max(-maxX, rawX)),
+        y: Math.min(maxY, Math.max(-maxY, rawY)),
+      })
+    } else if (isMouseDownRef.current && scaleRef.current <= 1.05 && images.length > 1) {
+      const diff = e.clientX - mouseStartXRef.current
+      setDragOffset(diff)
+    }
   }
 
-  const handleMouseUp = (e) => {
-    if (!isMouseDownRef.current || images.length <= 1) return
-    const diff = e.clientX - mouseStartXRef.current
-    const threshold = 45
-
-    if (diff < -threshold) {
-      setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
-    } else if (diff > threshold) {
-      setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+  const handleMouseUp = () => {
+    if (isPanningRef.current) {
+      isPanningRef.current = false
+      setIsInteracting(false)
+      return
     }
 
-    isMouseDownRef.current = false
-    setDragOffset(0)
-    setIsDragging(false)
+    if (isMouseDownRef.current && images.length > 1) {
+      const diff = mouseStartXRef.current ? (touchCurrentXRef.current || 0) : 0
+      // diff handled by dragOffset
+      const threshold = 45
+
+      if (dragOffset < -threshold) {
+        setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+      } else if (dragOffset > threshold) {
+        setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+      }
+
+      isMouseDownRef.current = false
+      setDragOffset(0)
+      setIsDragging(false)
+      setIsInteracting(false)
+    }
   }
 
   const handleMouseLeave = () => {
+    if (isPanningRef.current) {
+      isPanningRef.current = false
+      setIsInteracting(false)
+    }
     if (isMouseDownRef.current) {
       isMouseDownRef.current = false
       setDragOffset(0)
       setIsDragging(false)
+      setIsInteracting(false)
+    }
+  }
+
+  const handleDoubleClick = (e) => {
+    e.stopPropagation()
+    if (scaleRef.current > 1.05) {
+      resetZoom()
+    } else {
+      setScale(2.5)
+      setPosition({ x: 0, y: 0 })
     }
   }
 
@@ -128,6 +314,33 @@ export default function DishModal({ dish: rawDish, onClose, language = 'fr' }) {
         </span>
       </div>
 
+      {/* Bouton Zoom In / Zoom Out */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          if (scale > 1.05) {
+            resetZoom()
+          } else {
+            setScale(2.5)
+            setPosition({ x: 0, y: 0 })
+          }
+        }}
+        className="absolute top-4 right-17 sm:top-6 sm:right-22 z-30 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-xs"
+        aria-label={scale > 1.05 ? t.dishModal.zoomOut : t.dishModal.zoomIn}
+        title={scale > 1.05 ? t.dishModal.zoomOut : t.dishModal.zoomIn}
+      >
+        {scale > 1.05 ? (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+          </svg>
+        ) : (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+          </svg>
+        )}
+      </button>
+
       {/* Bouton Fermer */}
       <button
         type="button"
@@ -140,8 +353,8 @@ export default function DishModal({ dish: rawDish, onClose, language = 'fr' }) {
         </svg>
       </button>
 
-      {/* FLÈCHES BLANCHES LATÉRALES DE DÉFILEMENT (GAUCHE ET DROITE) */}
-      {images.length > 1 && (
+      {/* FLÈCHES BLANCHES LATÉRALES DE DÉFILEMENT (GAUCHE ET DROITE) - masquées en zoom */}
+      {images.length > 1 && scale <= 1.05 && (
         <button
           type="button"
           onClick={(e) => {
@@ -157,7 +370,7 @@ export default function DishModal({ dish: rawDish, onClose, language = 'fr' }) {
         </button>
       )}
 
-      {images.length > 1 && (
+      {images.length > 1 && scale <= 1.05 && (
         <button
           type="button"
           onClick={(e) => {
@@ -175,10 +388,10 @@ export default function DishModal({ dish: rawDish, onClose, language = 'fr' }) {
 
       {/* 
         ZONE D'AFFICHAGE ET DE GLISSEMENT (TOUCH ET SOURIS)
-        Navigation fluide par swipe / drag et flèches
+        Navigation fluide par swipe / drag et zoom
       */}
       <div
-        className="relative w-full h-full flex items-center justify-center p-4 sm:p-12 md:p-16 overflow-hidden touch-pan-y"
+        className="relative w-full h-full flex items-center justify-center p-4 sm:p-12 md:p-16 overflow-hidden select-none"
         onClick={onClose}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -187,16 +400,23 @@ export default function DishModal({ dish: rawDish, onClose, language = 'fr' }) {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
-        style={{ cursor: images.length > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
+        style={{
+          touchAction: 'none',
+          cursor: scale > 1.05 ? (isInteracting ? 'grabbing' : 'grab') : (images.length > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default'),
+        }}
       >
         <div
-          className={`relative max-w-[92vw] max-h-[82vh] flex items-center justify-center transition-transform ${
-            isDragging ? 'duration-0' : 'duration-300 ease-out'
+          className={`relative max-w-[92vw] max-h-[82vh] flex items-center justify-center ${
+            isInteracting ? 'transition-none' : 'transition-transform duration-300 ease-out'
           }`}
           style={{
-            transform: `translateX(${dragOffset}px)`,
+            transform: scale > 1.05
+              ? `translate(${position.x}px, ${position.y}px) scale(${scale})`
+              : `translateX(${dragOffset}px)`,
+            touchAction: 'none',
           }}
           onClick={(e) => e.stopPropagation()}
+          onDoubleClick={handleDoubleClick}
         >
           <img
             key={images[currentIndex]}
@@ -208,11 +428,28 @@ export default function DishModal({ dish: rawDish, onClose, language = 'fr' }) {
         </div>
       </div>
 
+      {/* BADGE QUAND L'IMAGE EST ZOOMÉE : Indique le zoom et permet de réinitialiser facilement */}
+      {scale > 1.05 && (
+        <div
+          className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 bg-black/80 px-4 py-2 rounded-full backdrop-blur-md border border-white/20 text-xs text-white shadow-xl animate-in fade-in"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span className="font-mono">{Math.round(scale * 10) / 10}x</span>
+          <span className="w-1 h-1 rounded-full bg-white/40"></span>
+          <button
+            type="button"
+            onClick={resetZoom}
+            className="text-stone-300 hover:text-white underline cursor-pointer"
+          >
+            {t.dishModal.zoomOut}
+          </button>
+        </div>
+      )}
+
       {/* 
-        INDICATEURS DE PAGINATION (UNIQUEMENT LES PETITS POINTS EN BAS)
-        Permettent de choisir directement l'image
+        INDICATEURS DE PAGINATION (UNIQUEMENT LES PETITS POINTS EN BAS) - masqués en zoom
       */}
-      {images.length > 1 && (
+      {images.length > 1 && scale <= 1.05 && (
         <div
           className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 bg-black/60 px-4 py-2.5 rounded-full backdrop-blur-md border border-white/15 shadow-xl"
           onClick={(e) => e.stopPropagation()}
@@ -225,7 +462,7 @@ export default function DishModal({ dish: rawDish, onClose, language = 'fr' }) {
                 setCurrentIndex(idx)
                 setDragOffset(0)
               }}
-              className={`p-1.5 cursor-pointer focus:outline-hidden transition-all group`}
+              className="p-1.5 cursor-pointer focus:outline-hidden transition-all group"
               aria-label={`${t.dishModal.goToPhoto} ${idx + 1}`}
             >
               <span

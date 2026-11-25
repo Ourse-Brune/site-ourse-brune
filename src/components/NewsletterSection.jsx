@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { formatTypography } from '../utils/typography'
 import { TRANSLATIONS } from '../data/translations'
+import MediaGalleryGrid from './MediaGalleryGrid'
 
 export default function NewsletterSection({
   bannerTitle = 'NEWSLETTER / ACTUALITÉS',
   events = [],
   actualiteText = '',
   actualiteTextEn = '',
+  onMediaClick,
   isOpen: externalIsOpen,
   onToggle: externalOnToggle,
   language = 'fr',
@@ -195,25 +197,31 @@ export default function NewsletterSection({
                         ? evt.linkTextEn || t.newsletter?.learnMore || 'Learn more'
                         : evt.linkText || 'En savoir plus'
 
+                    const eventImages = evt.images && evt.images.length > 0
+                      ? evt.images
+                      : (evt.image ? [evt.image] : ['/images/COCTEAU-MALEINE.JPG'])
+
                     return (
                       <div
                         key={evt.id}
-                        className="grid grid-cols-1 sm:grid-cols-12 gap-6 sm:gap-8 md:gap-10 items-start"
+                        className="grid grid-cols-1 sm:grid-cols-12 gap-8 md:gap-12 items-start"
                       >
-                        {/* Colonne Gauche : Visuel de l'événement */}
-                        <div className="sm:col-span-5 flex justify-center sm:justify-start">
-                          <div className="relative overflow-hidden rounded-xl border border-stone-200 shadow-md bg-stone-100 w-full max-w-[280px] sm:max-w-[340px] aspect-square flex items-center justify-center">
-                            <img
-                              src={evt.image || '/images/COCTEAU-MALEINE.JPG'}
-                              alt={eventTitle || 'Visuel de l’événement'}
-                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                              loading="lazy"
-                            />
-                          </div>
+                        {/* Colonne Gauche : Galerie visuelle (50% de la largeur) */}
+                        <div className="sm:col-span-6 flex flex-col justify-start w-full">
+                          <MediaGalleryGrid
+                            images={eventImages}
+                            title={eventTitle}
+                            onImageClick={(idx) => onMediaClick && onMediaClick({
+                              id: evt.id,
+                              title: eventTitle,
+                              titleEn: evt.titleEn,
+                              images: eventImages,
+                            }, idx)}
+                          />
                         </div>
 
-                        {/* Colonne Droite : Titre, date, description et liens utiles (alignés en haut avec l'image) */}
-                        <div className="sm:col-span-7 flex flex-col justify-start text-left pt-0">
+                        {/* Colonne Droite : Titre, date, description et liens utiles (50% de la largeur) */}
+                        <div className="sm:col-span-6 flex flex-col justify-start text-left pt-0">
                           {eventDate && (
                             <span className="inline-block px-3 py-1 mb-2.5 rounded-full text-xs font-bold uppercase tracking-wider bg-stone-100 text-stone-800 border border-stone-300 w-fit">
                               {formatTypography(eventDate, language)}

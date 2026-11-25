@@ -69,6 +69,8 @@ function App() {
   const [siteBanners, setSiteBanners] = useState(SITE_BANNERS_DEFAULT)
   const [events, setEvents] = useState(DEFAULT_EVENTS)
   const [surMesureProjects, setSurMesureProjects] = useState(DEFAULT_SUR_MESURE_PROJECTS)
+  const [surMesureText, setSurMesureText] = useState('')
+  const [surMesureTextEn, setSurMesureTextEn] = useState('')
   const [ourseBruneText, setOurseBruneText] = useState('')
   const [ourseBruneTextEn, setOurseBruneTextEn] = useState('')
   const [contactText, setContactText] = useState('')
@@ -131,6 +133,7 @@ function App() {
           sanityContact,
           sanityActualite,
           sanitySurMesure,
+          sanitySurMesureText,
         ] = await Promise.all([
           sanityClient.fetch(`*[_type == "serie" && !(_id in path("drafts.**"))] | order(order asc, _createdAt asc)`),
           sanityClient.fetch(
@@ -146,7 +149,15 @@ function App() {
           sanityClient.fetch(`*[_type == "texteContact"][0]`),
           sanityClient.fetch(`*[_type == "texteActualite"][0]`),
           sanityClient.fetch(`*[_type == "projetSurMesure" && !(_id in path("drafts.**"))] | order(order asc, _createdAt desc)`),
+          sanityClient.fetch(`*[_type == "texteSurMesure"][0]`),
         ])
+
+        if (sanitySurMesureText?.text) {
+          setSurMesureText(formatTypography(sanitySurMesureText.text))
+        }
+        if (sanitySurMesureText?.textEn) {
+          setSurMesureTextEn(formatTypography(sanitySurMesureText.textEn, 'en'))
+        }
 
         if (sanityOurseBrune?.storyText) {
           setOurseBruneText(formatTypography(sanityOurseBrune.storyText))
@@ -170,35 +181,55 @@ function App() {
         }
 
         if (sanityEvents && sanityEvents.length > 0) {
-          const formatted = sanityEvents.map((ev) => ({
-            id: ev._id,
-            title: formatTypography(ev.title),
-            titleEn: ev.titleEn ? formatTypography(ev.titleEn, 'en') : '',
-            date: formatTypography(ev.date || ''),
-            dateEn: ev.dateEn ? formatTypography(ev.dateEn, 'en') : '',
-            image: ev.image ? urlFor(ev.image).width(900).url() : '/images/COCTEAU-MALEINE.JPG',
-            description: formatTypography(ev.description || ''),
-            descriptionEn: ev.descriptionEn ? formatTypography(ev.descriptionEn, 'en') : '',
-            link: ev.link || '',
-            linkText: formatTypography(ev.linkText || 'En savoir plus'),
-            linkTextEn: ev.linkTextEn ? formatTypography(ev.linkTextEn, 'en') : '',
-            order: ev.order ?? 1,
-          }))
+          const formatted = sanityEvents.map((ev) => {
+            const mainImageUrl = ev.image ? urlFor(ev.image).width(1200).url() : '/images/COCTEAU-MALEINE.JPG'
+            const galleryUrls = ev.gallery && Array.isArray(ev.gallery)
+              ? ev.gallery.map((img) => urlFor(img).width(1600).url()).filter(Boolean)
+              : []
+            const allImages = [mainImageUrl, ...galleryUrls].filter(Boolean).filter((val, idx, arr) => arr.indexOf(val) === idx)
+
+            return {
+              id: ev._id,
+              title: formatTypography(ev.title),
+              titleEn: ev.titleEn ? formatTypography(ev.titleEn, 'en') : '',
+              date: formatTypography(ev.date || ''),
+              dateEn: ev.dateEn ? formatTypography(ev.dateEn, 'en') : '',
+              image: mainImageUrl,
+              gallery: galleryUrls,
+              images: allImages,
+              description: formatTypography(ev.description || ''),
+              descriptionEn: ev.descriptionEn ? formatTypography(ev.descriptionEn, 'en') : '',
+              link: ev.link || '',
+              linkText: formatTypography(ev.linkText || 'En savoir plus'),
+              linkTextEn: ev.linkTextEn ? formatTypography(ev.linkTextEn, 'en') : '',
+              order: ev.order ?? 1,
+            }
+          })
           setEvents(formatted)
         }
 
         if (sanitySurMesure && sanitySurMesure.length > 0) {
-          const formattedSurMesure = sanitySurMesure.map((proj) => ({
-            id: proj._id,
-            title: formatTypography(proj.title),
-            titleEn: proj.titleEn ? formatTypography(proj.titleEn, 'en') : '',
-            date: formatTypography(proj.date || ''),
-            dateEn: proj.dateEn ? formatTypography(proj.dateEn, 'en') : '',
-            image: proj.image ? urlFor(proj.image).width(900).url() : '/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg',
-            description: formatTypography(proj.description || ''),
-            descriptionEn: proj.descriptionEn ? formatTypography(proj.descriptionEn, 'en') : '',
-            order: proj.order ?? 1,
-          }))
+          const formattedSurMesure = sanitySurMesure.map((proj) => {
+            const mainImageUrl = proj.image ? urlFor(proj.image).width(1200).url() : '/images/nouveauxBandeauxClairs/BANDO_SUR-MESURE.jpg'
+            const galleryUrls = proj.gallery && Array.isArray(proj.gallery)
+              ? proj.gallery.map((img) => urlFor(img).width(1600).url()).filter(Boolean)
+              : []
+            const allImages = [mainImageUrl, ...galleryUrls].filter(Boolean).filter((val, idx, arr) => arr.indexOf(val) === idx)
+
+            return {
+              id: proj._id,
+              title: formatTypography(proj.title),
+              titleEn: proj.titleEn ? formatTypography(proj.titleEn, 'en') : '',
+              date: formatTypography(proj.date || ''),
+              dateEn: proj.dateEn ? formatTypography(proj.dateEn, 'en') : '',
+              image: mainImageUrl,
+              gallery: galleryUrls,
+              images: allImages,
+              description: formatTypography(proj.description || ''),
+              descriptionEn: proj.descriptionEn ? formatTypography(proj.descriptionEn, 'en') : '',
+              order: proj.order ?? 1,
+            }
+          })
           setSurMesureProjects(formattedSurMesure)
         }
 
@@ -227,6 +258,18 @@ function App() {
             newsletterTitleEn: sanityBanners.newsletterTitleEn
               ? formatTypography(sanityBanners.newsletterTitleEn, 'en')
               : prev.newsletterTitleEn,
+            footerCredits: sanityBanners.footerCredits
+              ? formatTypography(sanityBanners.footerCredits)
+              : prev.footerCredits,
+            footerCreditsEn: sanityBanners.footerCreditsEn
+              ? formatTypography(sanityBanners.footerCreditsEn, 'en')
+              : prev.footerCreditsEn,
+            footerSubtitle: sanityBanners.footerSubtitle
+              ? formatTypography(sanityBanners.footerSubtitle)
+              : prev.footerSubtitle,
+            footerSubtitleEn: sanityBanners.footerSubtitleEn
+              ? formatTypography(sanityBanners.footerSubtitleEn, 'en')
+              : prev.footerSubtitleEn,
           }))
         }
 
@@ -298,6 +341,21 @@ function App() {
     }, 60)
   }
 
+  const handleOpenMediaModal = (item, index = 0) => {
+    const images = item.images && item.images.length > 0
+      ? item.images
+      : [item.image].filter(Boolean)
+
+    setSelectedDish({
+      id: `${item.id}-${index}`,
+      name: item.title,
+      titleEn: item.titleEn,
+      image: images[0],
+      gallery: images.slice(1),
+      initialIndex: index,
+    })
+  }
+
   const handleContactClick = (subject) => {
     const defaultCustom = language === 'en' ? "Bespoke project" : "Projet sur-mesure"
     setContactSubject(subject || defaultCustom)
@@ -353,7 +411,10 @@ function App() {
           bannerTitle={language === 'en' && siteBanners.surMesureTitleEn ? siteBanners.surMesureTitleEn : siteBanners.surMesureTitle}
           bannerImage={siteBanners.surMesureBanner}
           projects={surMesureProjects}
+          surMesureText={surMesureText}
+          surMesureTextEn={surMesureTextEn}
           onContactClick={handleContactClick}
+          onMediaClick={handleOpenMediaModal}
           isCenter={activeCenterId === 'sur-mesure'}
           language={language}
         />
@@ -385,6 +446,7 @@ function App() {
           events={events}
           actualiteText={actualiteText}
           actualiteTextEn={actualiteTextEn}
+          onMediaClick={handleOpenMediaModal}
           isOpen={isNewsletterOpen}
           onToggle={setIsNewsletterOpen}
           language={language}
@@ -393,7 +455,11 @@ function App() {
 
       {/* FOOTER */}
       <div className="relative z-10 w-full bg-black">
-        <Footer language={language} />
+        <Footer
+          language={language}
+          credits={language === 'en' && siteBanners.footerCreditsEn ? siteBanners.footerCreditsEn : siteBanners.footerCredits}
+          subtitle={language === 'en' && siteBanners.footerSubtitleEn ? siteBanners.footerSubtitleEn : siteBanners.footerSubtitle}
+        />
       </div>
 
       {/* LIGHTBOX MODAL SANS FLÈCHES, AVEC POINTS ET NAVIGATION SWIPE / DRAG */}
